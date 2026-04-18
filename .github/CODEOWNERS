@@ -1,0 +1,32 @@
+# Binderbase — code ownership.
+#
+# Syntax: https://docs.github.com/en/repositories/managing-your-repositorys-settings-and-security/customizing-your-repository/about-code-owners
+#
+# Each line is: <path pattern>  <@owner> [<@owner> ...]
+# The last matching pattern wins, so more specific rules go at the bottom.
+#
+# Note: CODEOWNERS assignment only *requests* review. It does not block merge
+# unless branch protection is configured to "Require review from Code Owners"
+# (see docs/OPERATIONS.md).
+
+# Default owner for anything not matched below.
+*                                   @aecyx
+
+# --- CI / release infrastructure -------------------------------------------
+/.github/                           @aecyx
+/.github/workflows/                 @aecyx
+/.github/dependabot.yml             @aecyx
+
+# --- Security-sensitive files ----------------------------------------------
+/SECURITY.md                        @aecyx
+/src-tauri/tauri.conf.json          @aecyx
+/src-tauri/capabilities/            @aecyx
+/src-tauri/Cargo.toml               @aecyx
+/src-tauri/Cargo.lock               @aecyx
+/package.json                       @aecyx
+/package-lock.json                  @aecyx
+
+# --- Governance / licensing ------------------------------------------------
+/LICENSE                            @aecyx
+/CONTRIBUTING.md                    @aecyx
+/docs/DECISIONS.md                  @aecyx

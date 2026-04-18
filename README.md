@@ -45,6 +45,8 @@ npm run tauri ios init         # macOS only; requires Xcode
 
 See [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md) for how the codebase is structured to share logic between desktop and mobile.
 
+See [`docs/OPERATIONS.md`](docs/OPERATIONS.md) for repo, CI, and release configuration — including branch protection and required status checks.
+
 ## Repository layout
 
 ```
