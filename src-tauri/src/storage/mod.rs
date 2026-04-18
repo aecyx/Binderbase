@@ -74,11 +74,9 @@ mod migrations {
             );",
         )?;
         let current: Option<u32> = conn
-            .query_row(
-                "SELECT MAX(version) FROM schema_version",
-                [],
-                |r| r.get::<_, Option<u32>>(0),
-            )
+            .query_row("SELECT MAX(version) FROM schema_version", [], |r| {
+                r.get::<_, Option<u32>>(0)
+            })
             .unwrap_or(None);
 
         let current = current.unwrap_or(0);

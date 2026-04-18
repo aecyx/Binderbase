@@ -111,9 +111,7 @@ pub fn list(conn: &Connection, game: Option<Game>) -> Result<Vec<CollectionEntry
             quantity: row.get::<_, i64>(5)? as u32,
             notes: row.get(6)?,
             acquired_at: row.get(7)?,
-            acquired_price_cents: row
-                .get::<_, Option<i64>>(8)?
-                .map(|v| v.max(0) as u64),
+            acquired_price_cents: row.get::<_, Option<i64>>(8)?.map(|v| v.max(0) as u64),
         })
     };
 

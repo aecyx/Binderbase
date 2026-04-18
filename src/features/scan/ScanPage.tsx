@@ -34,11 +34,7 @@ export function ScanPage(): ReactElement {
 
       <div className="form-row">
         <label htmlFor="game-select">Game</label>
-        <select
-          id="game-select"
-          value={game}
-          onChange={(e) => setGame(e.target.value as Game)}
-        >
+        <select id="game-select" value={game} onChange={(e) => setGame(e.target.value as Game)}>
           <option value="mtg">{GAME_DISPLAY_NAME.mtg}</option>
           <option value="pokemon">{GAME_DISPLAY_NAME.pokemon}</option>
         </select>
@@ -72,8 +68,8 @@ export function ScanPage(): ReactElement {
           </p>
           {result.matches.length === 0 ? (
             <p className="muted">
-              No matches yet — identification model is still a work in progress.
-              See <code>src-tauri/src/scanning/mod.rs</code>.
+              No matches yet — identification model is still a work in progress. See{" "}
+              <code>src-tauri/src/scanning/mod.rs</code>.
             </p>
           ) : (
             <ol>

@@ -41,8 +41,7 @@ function App(): ReactElement {
       {info && (
         <footer className="app__footer">
           <span className="muted">
-            {info.name} · v{info.version} · local data:{" "}
-            <code>{info.db_path}</code>
+            {info.name} · v{info.version} · local data: <code>{info.db_path}</code>
           </span>
         </footer>
       )}

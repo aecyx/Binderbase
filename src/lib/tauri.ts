@@ -8,15 +8,7 @@
 // here first, and callers get real types.
 
 import { invoke } from "@tauri-apps/api/core";
-import type {
-  AppInfo,
-  Card,
-  CollectionEntry,
-  Game,
-  NewEntry,
-  Price,
-  ScanResult,
-} from "../types";
+import type { AppInfo, Card, CollectionEntry, Game, NewEntry, Price, ScanResult } from "../types";
 
 export const api = {
   appInfo: () => invoke<AppInfo>("app_info"),
@@ -24,11 +16,9 @@ export const api = {
   fetchCard: (game: Game, id: string) => invoke<Card>("fetch_card", { game, id }),
 
   collection: {
-    list: (game?: Game) =>
-      invoke<CollectionEntry[]>("collection_list", { game: game ?? null }),
+    list: (game?: Game) => invoke<CollectionEntry[]>("collection_list", { game: game ?? null }),
     add: (entry: NewEntry) => invoke<CollectionEntry>("collection_add", { entry }),
-    remove: (entryId: string) =>
-      invoke<void>("collection_remove", { entryId }),
+    remove: (entryId: string) => invoke<void>("collection_remove", { entryId }),
   },
 
   pricing: {

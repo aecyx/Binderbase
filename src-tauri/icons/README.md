@@ -1,7 +1,7 @@
 # App icons
 
 > **These files are placeholders — the default Tauri logo from `npm create
-> tauri-app`. Replace them with real Binderbase branding before 1.0.**
+tauri-app`. Replace them with real Binderbase branding before 1.0.**
 
 ## What each file is for
 
@@ -12,32 +12,32 @@ them unless you also update the corresponding references.
 
 ### Cross-platform (referenced in `tauri.conf.json` → `bundle.icon`)
 
-| File              | Use                                        | Required dimensions |
-| ----------------- | ------------------------------------------ | ------------------- |
-| `32x32.png`       | Small tray / taskbar icon                  | 32 × 32 px          |
-| `128x128.png`     | Standard app icon (Linux, fallback)        | 128 × 128 px        |
-| `128x128@2x.png`  | HiDPI app icon (macOS Retina, Linux HiDPI) | 256 × 256 px        |
-| `icon.icns`       | macOS application bundle icon              | Multi-resolution    |
-| `icon.ico`        | Windows executable icon                    | Multi-resolution    |
-| `icon.png`        | Source master (used by `tauri icon` tool)  | 1024 × 1024 px      |
+| File             | Use                                        | Required dimensions |
+| ---------------- | ------------------------------------------ | ------------------- |
+| `32x32.png`      | Small tray / taskbar icon                  | 32 × 32 px          |
+| `128x128.png`    | Standard app icon (Linux, fallback)        | 128 × 128 px        |
+| `128x128@2x.png` | HiDPI app icon (macOS Retina, Linux HiDPI) | 256 × 256 px        |
+| `icon.icns`      | macOS application bundle icon              | Multi-resolution    |
+| `icon.ico`       | Windows executable icon                    | Multi-resolution    |
+| `icon.png`       | Source master (used by `tauri icon` tool)  | 1024 × 1024 px      |
 
 ### Microsoft Store / MSIX (referenced by Tauri's AppxManifest template)
 
 These specific filenames are required by MSIX packaging. Renaming them breaks
 Windows Store builds.
 
-| File                     | Use                                  | Required dimensions |
-| ------------------------ | ------------------------------------ | ------------------- |
-| `Square30x30Logo.png`    | App list small icon                  | 30 × 30 px          |
-| `Square44x44Logo.png`    | Start-menu logo (100% scale)         | 44 × 44 px          |
-| `Square71x71Logo.png`    | Small tile                           | 71 × 71 px          |
-| `Square89x89Logo.png`    | App list medium icon                 | 89 × 89 px          |
-| `Square107x107Logo.png`  | App list large (HiDPI)               | 107 × 107 px        |
-| `Square142x142Logo.png`  | Medium tile                          | 142 × 142 px        |
-| `Square150x150Logo.png`  | Medium tile (100% scale)             | 150 × 150 px        |
-| `Square284x284Logo.png`  | Medium tile (HiDPI)                  | 284 × 284 px        |
-| `Square310x310Logo.png`  | Large tile                           | 310 × 310 px        |
-| `StoreLogo.png`          | Store listing thumbnail              | 50 × 50 px          |
+| File                    | Use                          | Required dimensions |
+| ----------------------- | ---------------------------- | ------------------- |
+| `Square30x30Logo.png`   | App list small icon          | 30 × 30 px          |
+| `Square44x44Logo.png`   | Start-menu logo (100% scale) | 44 × 44 px          |
+| `Square71x71Logo.png`   | Small tile                   | 71 × 71 px          |
+| `Square89x89Logo.png`   | App list medium icon         | 89 × 89 px          |
+| `Square107x107Logo.png` | App list large (HiDPI)       | 107 × 107 px        |
+| `Square142x142Logo.png` | Medium tile                  | 142 × 142 px        |
+| `Square150x150Logo.png` | Medium tile (100% scale)     | 150 × 150 px        |
+| `Square284x284Logo.png` | Medium tile (HiDPI)          | 284 × 284 px        |
+| `Square310x310Logo.png` | Large tile                   | 310 × 310 px        |
+| `StoreLogo.png`         | Store listing thumbnail      | 50 × 50 px          |
 
 ## Easiest way to regenerate: one command
 

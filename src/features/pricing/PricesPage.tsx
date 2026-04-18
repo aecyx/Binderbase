@@ -36,17 +36,13 @@ export function PricesPage(): ReactElement {
     <section aria-labelledby="prices-heading">
       <h1 id="prices-heading">Prices</h1>
       <p className="muted">
-        Live catalog lookup + cached price history. Prices are pulled from
-        Scryfall (MTG) or the Pokémon TCG API.
+        Live catalog lookup + cached price history. Prices are pulled from Scryfall (MTG) or the
+        Pokémon TCG API.
       </p>
 
       <div className="form-row">
         <label htmlFor="price-game">Game</label>
-        <select
-          id="price-game"
-          value={game}
-          onChange={(e) => setGame(e.target.value as Game)}
-        >
+        <select id="price-game" value={game} onChange={(e) => setGame(e.target.value as Game)}>
           <option value="mtg">{GAME_DISPLAY_NAME.mtg}</option>
           <option value="pokemon">{GAME_DISPLAY_NAME.pokemon}</option>
         </select>
@@ -85,8 +81,7 @@ export function PricesPage(): ReactElement {
         <article className="card-detail">
           <h2>{card.name}</h2>
           <p className="muted">
-            {card.set_name} ({card.set_code.toUpperCase()}) · #
-            {card.collector_number}
+            {card.set_name} ({card.set_code.toUpperCase()}) · #{card.collector_number}
             {card.rarity ? ` · ${card.rarity}` : ""}
           </p>
           {card.image_url && (

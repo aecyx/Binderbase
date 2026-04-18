@@ -43,29 +43,29 @@ ADR-0002.
 
 ### Backend (`src-tauri/src/`)
 
-| Module        | Responsibility                                                          |
-| ------------- | ----------------------------------------------------------------------- |
+| Module        | Responsibility                                                            |
+| ------------- | ------------------------------------------------------------------------- |
 | `core/`       | Shared types (`Game`, `Card`, `CardCondition`, IDs) and the `Error` enum. |
 | `games/`      | Per-game adapters. `mtg.rs` talks to Scryfall, `pokemon.rs` to PTCGAPI.   |
-| `storage/`    | SQLite connection, schema, and migrations (`schema_vN.sql`).             |
-| `collection/` | CRUD over `collection_entries`.                                          |
-| `pricing/`    | Cached price reads and upserts.                                          |
-| `scanning/`   | Image decode + (future) card identification pipeline.                    |
-| `commands.rs` | The Tauri command surface. Every `#[tauri::command]` lives here.         |
-| `lib.rs`      | Wires modules, initializes state, registers commands.                    |
+| `storage/`    | SQLite connection, schema, and migrations (`schema_vN.sql`).              |
+| `collection/` | CRUD over `collection_entries`.                                           |
+| `pricing/`    | Cached price reads and upserts.                                           |
+| `scanning/`   | Image decode + (future) card identification pipeline.                     |
+| `commands.rs` | The Tauri command surface. Every `#[tauri::command]` lives here.          |
+| `lib.rs`      | Wires modules, initializes state, registers commands.                     |
 
 ### Frontend (`src/`)
 
-| Path              | Responsibility                                                      |
-| ----------------- | ------------------------------------------------------------------- |
-| `components/`     | Shared widgets (e.g. `TopNav`).                                     |
-| `features/scan/`  | Image upload + identify flow.                                       |
-| `features/collection/` | Collection table, add/remove.                                   |
-| `features/pricing/`    | Card lookup + price history.                                    |
-| `features/import_export/` | CSV and deck-list import/export (stubbed in 0.1).           |
-| `lib/tauri.ts`    | Typed `invoke` wrappers. The only file allowed to call `invoke`.    |
-| `styles/global.css` | Design tokens and base element styles.                            |
-| `types/index.ts`  | TS mirrors of Rust types.                                           |
+| Path                      | Responsibility                                                   |
+| ------------------------- | ---------------------------------------------------------------- |
+| `components/`             | Shared widgets (e.g. `TopNav`).                                  |
+| `features/scan/`          | Image upload + identify flow.                                    |
+| `features/collection/`    | Collection table, add/remove.                                    |
+| `features/pricing/`       | Card lookup + price history.                                     |
+| `features/import_export/` | CSV and deck-list import/export (stubbed in 0.1).                |
+| `lib/tauri.ts`            | Typed `invoke` wrappers. The only file allowed to call `invoke`. |
+| `styles/global.css`       | Design tokens and base element styles.                           |
+| `types/index.ts`          | TS mirrors of Rust types.                                        |
 
 ## Data model (overview)
 
@@ -89,15 +89,15 @@ accumulating `schema_vN.sql` files applied in order by
 
 Currently:
 
-| Command                          | Purpose                                    |
-| -------------------------------- | ------------------------------------------ |
-| `app_info`                       | Version, build metadata, DB path.          |
-| `fetch_card(game, card_id)`      | Live catalog lookup via the game adapter.  |
-| `collection_list(game?)`         | List collection, optionally filtered.      |
-| `collection_add(entry)`          | Insert a collection entry.                 |
-| `collection_remove(entry_id)`    | Delete by entry id.                        |
-| `pricing_get_cached(game, id)`   | Read cached prices.                        |
-| `scan_identify(bytes, hint?)`    | Decode an image and return candidate matches (stubbed). |
+| Command                        | Purpose                                                 |
+| ------------------------------ | ------------------------------------------------------- |
+| `app_info`                     | Version, build metadata, DB path.                       |
+| `fetch_card(game, card_id)`    | Live catalog lookup via the game adapter.               |
+| `collection_list(game?)`       | List collection, optionally filtered.                   |
+| `collection_add(entry)`        | Insert a collection entry.                              |
+| `collection_remove(entry_id)`  | Delete by entry id.                                     |
+| `pricing_get_cached(game, id)` | Read cached prices.                                     |
+| `scan_identify(bytes, hint?)`  | Decode an image and return candidate matches (stubbed). |
 
 All errors serialize as `{ kind, message }` — matched by the TS
 `BinderbaseError` discriminated union. UI should branch on `kind`, not parse

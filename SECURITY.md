@@ -5,11 +5,11 @@
 Binderbase is pre-1.0. Only the latest `main` branch and the most recent
 released version receive security updates.
 
-| Version | Supported |
-| ------- | --------- |
-| `main`  | Yes       |
-| latest release | Yes |
-| older releases | No  |
+| Version        | Supported |
+| -------------- | --------- |
+| `main`         | Yes       |
+| latest release | Yes       |
+| older releases | No        |
 
 ## Reporting a vulnerability
 

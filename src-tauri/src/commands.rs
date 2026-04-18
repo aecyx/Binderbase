@@ -82,10 +82,7 @@ pub fn collection_list(
 }
 
 #[tauri::command]
-pub fn collection_add(
-    state: State<'_, AppState>,
-    entry: NewEntry,
-) -> Result<CollectionEntry> {
+pub fn collection_add(state: State<'_, AppState>, entry: NewEntry) -> Result<CollectionEntry> {
     state.with_conn(|c| collection::add(c, entry))
 }
 
