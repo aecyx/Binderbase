@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: AGPL-3.0-or-later
 //! Local collection — CRUD over `collection_entries`.
 //!
 //! Every method takes a `&Connection` so callers can batch operations into a

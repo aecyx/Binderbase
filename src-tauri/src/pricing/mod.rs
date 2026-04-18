@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: AGPL-3.0-or-later
 //! Local price cache + lookup.
 //!
 //! Philosophy: we never block on a live price fetch for UI reads. Reads go

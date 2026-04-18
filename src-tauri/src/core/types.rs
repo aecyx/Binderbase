@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: AGPL-3.0-or-later
 //! Game-agnostic domain types shared by the catalog, collection, scanning,
 //! and pricing subsystems.
 

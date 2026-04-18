@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: AGPL-3.0-or-later
 //! Magic: The Gathering adapter.
 //!
 //! Data source: Scryfall — https://scryfall.com/docs/api

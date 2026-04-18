@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: AGPL-3.0-or-later
 //! Core domain model — game-agnostic types used everywhere.
 //!
 //! Keep this module free of I/O, HTTP, SQLite, or platform-specific code.

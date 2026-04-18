@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: AGPL-3.0-or-later
 // Typed wrappers around `@tauri-apps/api/core` invoke().
 //
 // Rationale: sprinkling bare `invoke("command_name", ...)` calls around the

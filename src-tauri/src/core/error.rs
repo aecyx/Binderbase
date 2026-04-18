@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: AGPL-3.0-or-later
 //! Central application error type.
 //!
 //! Frontend code consumes these via Tauri commands, which serialize `Error`

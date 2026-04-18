@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: AGPL-3.0-or-later
 //! Per-game adapters.
 //!
 //! Each submodule implements the catalog (card lookup) and, where supported,

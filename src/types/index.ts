@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: AGPL-3.0-or-later
 // Frontend-side mirrors of the Rust types exposed over Tauri commands.
 //
 // These are kept hand-written (not generated) for two reasons:

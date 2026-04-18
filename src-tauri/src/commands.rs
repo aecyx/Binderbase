@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: AGPL-3.0-or-later
 //! Tauri commands — the thin bridge between the frontend and the Rust core.
 //!
 //! Keep this file a thin dispatcher: parse inputs, call into domain modules,

@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: AGPL-3.0-or-later
 //! SQLite storage layer.
 //!
 //! We use `rusqlite` with the `bundled` feature — the SQLite source is
