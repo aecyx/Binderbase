@@ -6,82 +6,197 @@ items must be applied through the GitHub web UI because they are not
 expressible in repository files alone.
 
 If you change any of the items below in the UI, please also update this
-document so the repo's state is self-describing.
+document so the repo's state is self-describing. When in doubt, prefer
+the more restrictive of two options; we can loosen later.
+
+> **Admin note.** These are recommendations for the maintainer (`@aecyx`
+> at time of writing). Items marked _(GHAS only)_ require GitHub Advanced
+> Security, which is included for public repos and needs a paid plan on
+> private ones.
 
 ---
 
-## Repository settings (apply via GitHub UI)
+## About panel (repo home page, not Settings)
 
-GitHub → **Settings → General**:
+On `github.com/aecyx/Binderbase`, the right sidebar has an **About**
+section. Click the small gear icon next to the word **About** to edit:
 
-| Setting                            | Value                                                                                                                   |
-| ---------------------------------- | ----------------------------------------------------------------------------------------------------------------------- |
-| Description                        | `Local-first TCG scanner and collection manager (MTG + Pokémon).`                                                       |
-| Website                            | _(leave blank until we publish a landing page)_                                                                         |
-| Topics                             | `tauri`, `rust`, `react`, `typescript`, `tcg`, `mtg`, `pokemon-tcg`, `local-first`, `desktop-app`, `collection-manager` |
-| Default branch                     | `main`                                                                                                                  |
-| Allow merge commits                | **Off**                                                                                                                 |
-| Allow squash merging               | **On** — default PR merge style                                                                                         |
-| Allow rebase merging               | **On** — for linear-history fast-forwards                                                                               |
-| Automatically delete head branches | **On**                                                                                                                  |
-| Features → Wikis                   | **Off** (docs live in `docs/`)                                                                                          |
-| Features → Issues                  | **On**                                                                                                                  |
-| Features → Discussions             | **On** once we have users                                                                                               |
-| Features → Projects                | **On**                                                                                                                  |
+| Field       | Value                                                                                                                   |
+| ----------- | ----------------------------------------------------------------------------------------------------------------------- |
+| Description | `Local-first TCG scanner and collection manager (MTG + Pokémon).`                                                       |
+| Website     | _(leave blank until we publish a landing page)_                                                                         |
+| Topics      | `tauri`, `rust`, `react`, `typescript`, `tcg`, `mtg`, `pokemon-tcg`, `local-first`, `desktop-app`, `collection-manager` |
 
-## Branch protection (apply via GitHub UI)
+Also in the About panel, check:
 
-GitHub → **Settings → Branches → Branch protection rules → Add rule**.
+- **Releases** — on (automatically becomes visible when we cut one).
+- **Packages** — off (we don't publish to GitHub Packages).
+- **Deployments** — off (no GitHub Environments yet).
 
-Protect `main` with:
+---
 
-- **Require a pull request before merging**
-  - Require approvals: **1** (owner review counts once we grow past one
-    contributor; until then, set to **0** and rely on CI + self-review).
-  - Dismiss stale pull request approvals when new commits are pushed: **On**.
-  - Require review from Code Owners: **On** (uses `.github/CODEOWNERS`).
-- **Require status checks to pass before merging**
-  - Require branches to be up to date before merging: **On**.
-  - Required checks (add once they've run at least once on a PR):
-    - `CI / frontend`
-    - `CI / rust (ubuntu-latest)`
-    - `CI / rust (windows-latest)`
-    - `CI / rust (macos-latest)`
-    - `CI / audit`
-- **Require conversation resolution before merging**: **On**.
-- **Require linear history**: **On**.
-- **Require signed commits**: **On** once you set up a signing key. Not
-  required for the solo-dev phase, but turning it on later is cheap.
-- **Do not allow bypassing the above settings**: **On** — including for
-  admins. Forces even the owner to push changes through a PR.
-- **Restrict who can push to matching branches**: leave unchecked (the
-  above rules already gate writes).
-- **Allow force pushes**: **Off**.
-- **Allow deletions**: **Off**.
+## Settings → General
 
-## Security settings (apply via GitHub UI)
+### Pull Requests
 
-GitHub → **Settings → Code security**:
+| Setting                                               | Value   | Notes                                                                                                                                    |
+| ----------------------------------------------------- | ------- | ---------------------------------------------------------------------------------------------------------------------------------------- |
+| Allow merge commits                                   | **Off** | Merge commits clutter history; squash + rebase are enough.                                                                               |
+| Allow squash merging                                  | **On**  | Default style for PR merges. Keep the default commit message = PR title.                                                                 |
+| Allow rebase merging                                  | **On**  | For linear-history fast-forwards on trivial PRs.                                                                                         |
+| Always suggest updating pull request branches         | **On**  | Prompts PR authors to pull `main` in when it moves. Matches the "require branches up to date" branch rule.                               |
+| Allow auto-merge                                      | **Off** | Revisit once required checks + branch protection are proven. Risk: CI flake auto-merges a bad PR.                                        |
+| Automatically delete head branches                    | **On**  | Keeps the branch list clean after merge.                                                                                                 |
+| Require contributors to sign off on web-based commits | **Off** | That's DCO sign-off — useful for large OSS projects absorbing anonymous contributions. AGPL + `CONTRIBUTING.md` already establish terms. |
 
-- **Dependency graph**: **On** (default for private repos with
-  Dependabot configured).
-- **Dependabot alerts**: **On**.
-- **Dependabot security updates**: **On**.
-- **Dependabot version updates**: already configured in
-  `.github/dependabot.yml`.
-- **Secret scanning**: **On** (push protection + alerts). Available on
-  private repos only with GitHub Advanced Security.
-- **Private vulnerability reporting**: **On**. Referenced from
-  `SECURITY.md` as the primary disclosure channel.
+### Archives
 
-## Permissions for the default `GITHUB_TOKEN`
+| Setting                             | Value   | Notes                              |
+| ----------------------------------- | ------- | ---------------------------------- |
+| Include Git LFS objects in archives | Default | Irrelevant — we don't use Git LFS. |
 
-GitHub → **Settings → Actions → General → Workflow permissions**:
+### Features
 
-- **Read repository contents and packages permissions** (default, minimal).
-- **Allow GitHub Actions to create and approve pull requests**: **Off**
-  (Dependabot manages its own PRs; we don't want arbitrary workflow code
-  opening PRs on our behalf).
+| Feature                  | Value   | Notes                                                                                                                                |
+| ------------------------ | ------- | ------------------------------------------------------------------------------------------------------------------------------------ |
+| Wikis                    | **Off** | Documentation lives in `docs/` — versioned with the code, reviewed in PRs. Wikis fragment the docs surface.                          |
+| Issues                   | **On**  | Public issue tracker (for private-repo collaborators).                                                                               |
+| Sponsorships             | **Off** | Zero technical impact. Enable later if you want a "Sponsor" button — makes more sense after a 1.0 release.                           |
+| Projects                 | **On**  | Useful even for solo work; free.                                                                                                     |
+| Discussions              | **Off** | Turn on once there are users or external contributors. Moving issues → discussions later is one click; going the other way is messy. |
+| Preserve this repository | **Off** | GitHub Archive Program. Intended for long-lived public OSS snapshots; pointless on a private repo.                                   |
+
+### Interaction limits
+
+Private repos ignore interaction limits (only collaborators can interact
+anyway). Leave at default.
+
+---
+
+## Branch protection (`main`)
+
+GitHub is migrating everyone to **Rulesets** (Settings → Rules →
+Rulesets). You may see both the classic **Branches** page and the new
+**Rules** page. Prefer Rulesets.
+
+### If using Rulesets (preferred)
+
+Create a ruleset named **"protect-main"** with:
+
+- **Enforcement status:** **Active** (not Evaluate, not Disabled).
+- **Bypass list:** empty. (Do not add yourself — bypassing defeats the point.)
+- **Targets → Target branches → Add target:**
+  - `Include by pattern` → `main`
+  - _or_ `Include default branch`
+  - **If Targets shows 0 branches, this is the missing step.** The rule
+    doesn't apply to any branch until a target is added.
+- **Rules → enable:**
+  - Restrict creations: **Off** (we need to create branches).
+  - Restrict updates: **On** (only via the PR flow).
+  - Restrict deletions: **On** — you cannot delete `main`.
+  - Require linear history: **On**.
+  - Require a pull request before merging
+    - Required approvals: **0** while solo, bump to **1** once we have a
+      second maintainer. With 1 required and only one person able to
+      approve, you can't merge your own PRs.
+    - Dismiss stale pull request approvals when new commits are pushed: **On**.
+    - Require review from Code Owners: **On** (uses `.github/CODEOWNERS`).
+    - Require approval of the most recent reviewable push: **On**.
+    - Allowed merge methods: Squash, Rebase (match the Settings → General choice above).
+  - Require status checks to pass
+    - Require branches to be up to date before merging: **On**.
+    - Checks (add once each has run at least once on a PR):
+      - `CI / frontend`
+      - `CI / rust (ubuntu-latest)`
+      - `CI / rust (windows-latest)`
+      - `CI / rust (macos-latest)`
+      - `CI / audit`
+  - Block force pushes: **On**.
+  - Require code scanning results: _(only appears with GHAS + CodeQL enabled; configure once you set up CodeQL below)_
+  - Require signed commits: **Off for now**; turn on once you have a
+    signing key set up in Git and `gh`. Low cost to add later.
+  - Require deployments to succeed before merging: **Off**. We don't
+    use GitHub Environments yet.
+
+### If using classic Branch protection (fallback)
+
+Settings → Branches → Add rule:
+
+- Branch name pattern: `main` (just `main`, no slashes, no wildcards).
+- Same rule set as above, one-to-one mapped.
+
+### "Applied to 0 branches" diagnosis
+
+If the UI shows the rule applies to 0 branches, the cause is one of:
+
+1. **No target added** (most common with Rulesets). Fix: add `main`
+   or "Include default branch" in Targets.
+2. **Pattern typo.** `main` — no leading slash, no spaces, no wildcard
+   unless intentional (`main*` matches `main`, `maintenance`, etc.).
+3. **Ruleset status is Disabled or Evaluate.** Flip to **Active**.
+
+---
+
+## Code security (Settings → Code security, or Advanced Security on private repos)
+
+| Setting                         | Value                                       | Notes                                                                                                                                                                                                                  |
+| ------------------------------- | ------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Dependency graph                | **On**                                      | Default for repos with Dependabot configured.                                                                                                                                                                          |
+| Automatic dependency submission | **On**                                      | Uploads the dep graph to GitHub so alerts work for ecosystems without a parseable lockfile. Redundant for us (npm/cargo have lockfiles) but defense-in-depth.                                                          |
+| Dependabot alerts               | **On**                                      | Free, zero downside.                                                                                                                                                                                                   |
+| Dependabot security updates     | **On**                                      | Auto-opens PRs for vulnerable deps. Review them — don't auto-merge.                                                                                                                                                    |
+| Dependabot malware alerts       | **On**                                      | Alerts when a dep is flagged malicious (e.g., recent npm typo-squats). Free, zero downside.                                                                                                                            |
+| Grouped security updates        | **On**                                      | Rolls multiple security PRs into one. Matches the grouping we do in `dependabot.yml` for eslint/prettier/types/tauri.                                                                                                  |
+| Dependabot version updates      | **On**                                      | Configured via `.github/dependabot.yml` — nothing else to do in UI.                                                                                                                                                    |
+| Secret scanning alerts          | **On**                                      | _(GHAS only on private repos.)_ Catches committed tokens. Worth the cost on its own.                                                                                                                                   |
+| Push protection                 | **On**                                      | _(GHAS only on private repos.)_ Rejects pushes containing detected secrets at push time. Highest-value GHAS feature.                                                                                                   |
+| Private vulnerability reporting | **On**                                      | This is what `SECURITY.md` points people to. Free on all repos.                                                                                                                                                        |
+| CodeQL analysis                 | **On for JavaScript/TypeScript; skip Rust** | _(GHAS only on private repos.)_ TS/JS coverage is solid. Rust support is still in beta and adds noise; `cargo audit` in CI is doing more work today. Use the "Default" setup — GitHub commits a workflow file for you. |
+
+If you don't have GHAS on this private repo, enable everything free
+above and revisit CodeQL / secret scanning if the project flips public.
+
+---
+
+## Actions permissions (Settings → Actions → General)
+
+### Actions permissions
+
+Pick **"Allow `aecyx`, and select non-`aecyx`, actions and reusable workflows"** and enable:
+
+- Allow actions created by GitHub: **On**.
+- Allow actions by Marketplace verified creators: **On**.
+- Allow specified actions and reusable workflows — add exactly:
+  ```
+  actions/checkout@*
+  actions/setup-node@*
+  actions/cache@*
+  ```
+  These are every third-party action our CI currently uses. If you add
+  a new action to `.github/workflows/`, add it here in the same PR.
+
+Alternative: **"Allow all actions and reusable workflows"** is
+acceptable given every workflow change goes through human review. The
+allowlist above is cheap insurance against a compromised-action
+publish sneaking into a Dependabot bump.
+
+### Fork pull request workflows from outside collaborators
+
+**"Require approval for all outside collaborators"** (or at minimum
+"Require approval for first-time contributors"). For a private repo
+this rarely triggers, but it's a free safety net if the repo ever
+flips public or you add outside collaborators.
+
+### Fork pull request workflows in private repositories
+
+Leave default (workflows do not run on forks of private repos anyway).
+
+### Workflow permissions
+
+- **Read repository contents and packages permissions** (minimum).
+- **Allow GitHub Actions to create and approve pull requests:** **Off**
+  (Dependabot manages its own PRs via its own bot identity; we don't
+  want arbitrary workflow code opening PRs on our behalf).
 
 ---
 
@@ -164,7 +279,7 @@ These don't affect humans but matter for the AI assistant working in
   `npm`, `git diff`). When this happens, `git checkout HEAD -- <path>`
   or rewriting the file via `cat > path <<EOF ... EOF` from bash forces
   the cache to refresh.
-- The sandbox proxy allowlists `github.com` (for git push) but blocks
+- The sandbox proxy allowlists `github.com:443` (for git push) but blocks
   `api.github.com`. CI status, repo settings, and releases have to be
   checked through the web UI or the `gh` CLI run from the user's
   Windows terminal.
