@@ -1,0 +1,65 @@
+[package]
+name = "binderbase"
+version = "0.1.0"
+description = "Local-first trading-card-game scanner and collection manager."
+authors = ["aecyx"]
+license = "AGPL-3.0-or-later"
+repository = "https://github.com/aecyx/Binderbase"
+edition = "2021"
+rust-version = "1.78"
+
+[lib]
+# The `_lib` suffix is required so lib and bin names don't collide on Windows.
+# See https://github.com/rust-lang/cargo/issues/8519
+name = "binderbase_lib"
+crate-type = ["staticlib", "cdylib", "rlib"]
+
+[build-dependencies]
+tauri-build = { version = "2", features = [] }
+
+[dependencies]
+# Tauri
+tauri = { version = "2", features = [] }
+tauri-plugin-opener = "2"
+
+# Serialization
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
+
+# Async runtime (Tauri 2 already pulls in tokio; we declare it explicitly for our own use).
+tokio = { version = "1", features = ["rt-multi-thread", "macros", "sync", "time", "fs"] }
+
+# Error handling
+thiserror = "1"
+anyhow = "1"
+
+# Logging
+tracing = "0.1"
+tracing-subscriber = { version = "0.3", features = ["env-filter"] }
+
+# HTTP (rustls, no native-tls — works on all platforms including mobile)
+reqwest = { version = "0.12", default-features = false, features = ["json", "rustls-tls", "gzip", "brotli"] }
+
+# SQLite (bundled, so no system sqlite dependency needed on any target)
+rusqlite = { version = "0.31", features = ["bundled", "chrono"] }
+
+# Images
+image = { version = "0.25", default-features = false, features = ["jpeg", "png", "webp"] }
+
+# Time
+chrono = { version = "0.4", features = ["serde"] }
+
+# Cross-platform app-data directories
+directories = "5"
+
+# UUIDs
+uuid = { version = "1", features = ["v4", "serde"] }
+
+[dev-dependencies]
+tempfile = "3"
+
+[profile.release]
+lto = true
+codegen-units = 1
+strip = "symbols"
+panic = "abort"

@@ -1,0 +1,38 @@
+# Normalize all text to LF in the repo regardless of the contributor's OS.
+# Working-tree line endings are controlled by .editorconfig and each editor.
+
+* text=auto eol=lf
+
+# Lock a few files to explicit types to avoid heuristic surprises.
+*.rs            text eol=lf
+*.toml          text eol=lf
+*.ts            text eol=lf
+*.tsx           text eol=lf
+*.json          text eol=lf
+*.yml           text eol=lf
+*.yaml          text eol=lf
+*.md            text eol=lf
+*.css           text eol=lf
+*.html          text eol=lf
+*.sh            text eol=lf
+LICENSE         text eol=lf
+
+# Windows scripts keep CRLF.
+*.bat           text eol=crlf
+*.cmd           text eol=crlf
+*.ps1           text eol=crlf
+
+# Binary types — never diff, never touch line endings.
+*.png           binary
+*.jpg           binary
+*.jpeg          binary
+*.webp          binary
+*.ico           binary
+*.icns          binary
+*.woff          binary
+*.woff2         binary
+*.ttf           binary
+*.pdf           binary
+*.sqlite        binary
+*.sqlite3       binary
+*.db            binary

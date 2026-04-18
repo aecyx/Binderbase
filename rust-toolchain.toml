@@ -1,0 +1,6 @@
+# Pin Rust toolchain so every contributor and CI runner builds with the same
+# compiler + components. Bump `channel` deliberately.
+[toolchain]
+channel = "stable"
+components = ["rustfmt", "clippy"]
+profile = "minimal"

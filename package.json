@@ -1,0 +1,60 @@
+{
+  "name": "binderbase",
+  "private": true,
+  "version": "0.1.0",
+  "description": "Local-first trading-card-game scanner and collection manager (MTG, Pokemon).",
+  "type": "module",
+  "license": "AGPL-3.0-or-later",
+  "author": "aecyx",
+  "homepage": "https://github.com/aecyx/Binderbase",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/aecyx/Binderbase.git"
+  },
+  "bugs": {
+    "url": "https://github.com/aecyx/Binderbase/issues"
+  },
+  "keywords": [
+    "tauri",
+    "tcg",
+    "magic-the-gathering",
+    "pokemon",
+    "card-scanner",
+    "collection-manager",
+    "local-first"
+  ],
+  "scripts": {
+    "dev": "vite",
+    "build": "tsc && vite build",
+    "preview": "vite preview",
+    "tauri": "tauri",
+    "typecheck": "tsc --noEmit",
+    "lint": "eslint . --max-warnings 0",
+    "format": "prettier --write .",
+    "format:check": "prettier --check ."
+  },
+  "dependencies": {
+    "@tauri-apps/api": "^2",
+    "@tauri-apps/plugin-opener": "^2",
+    "react": "^19.1.0",
+    "react-dom": "^19.1.0"
+  },
+  "devDependencies": {
+    "@eslint/js": "^9.20.0",
+    "@tauri-apps/cli": "^2",
+    "@types/react": "^19.1.8",
+    "@types/react-dom": "^19.1.6",
+    "@typescript-eslint/eslint-plugin": "^8.20.0",
+    "@typescript-eslint/parser": "^8.20.0",
+    "@vitejs/plugin-react": "^4.6.0",
+    "eslint": "^9.20.0",
+    "eslint-plugin-react-hooks": "^5.1.0",
+    "eslint-plugin-react-refresh": "^0.4.14",
+    "prettier": "^3.4.0",
+    "typescript": "~5.8.3",
+    "vite": "^7.0.4"
+  },
+  "engines": {
+    "node": ">=22.0.0"
+  }
+}
