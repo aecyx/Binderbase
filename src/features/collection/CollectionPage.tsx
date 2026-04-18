@@ -8,16 +8,23 @@ export function CollectionPage(): ReactElement {
   const [filter, setFilter] = useState<Game | "all">("all");
   const [entries, setEntries] = useState<CollectionEntry[]>([]);
   const [error, setError] = useState<string | null>(null);
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState(true);
+
+  function changeFilter(value: Game | "all") {
+    setLoading(true);
+    setError(null);
+    setFilter(value);
+  }
 
   useEffect(() => {
     let cancelled = false;
-    setLoading(true);
-    setError(null);
     api.collection
       .list(filter === "all" ? undefined : filter)
       .then((rows) => {
-        if (!cancelled) setEntries(rows);
+        if (!cancelled) {
+          setEntries(rows);
+          setError(null);
+        }
       })
       .catch((e) => {
         if (!cancelled) {
@@ -41,7 +48,7 @@ export function CollectionPage(): ReactElement {
         <select
           id="coll-filter"
           value={filter}
-          onChange={(e) => setFilter(e.target.value as Game | "all")}
+          onChange={(e) => changeFilter(e.target.value as Game | "all")}
         >
           <option value="all">All games</option>
           <option value="mtg">{GAME_DISPLAY_NAME.mtg}</option>

@@ -70,4 +70,12 @@ export default [
       eqeqeq: ["error", "always"],
     },
   },
+  {
+    files: ["vite.config.ts", "eslint.config.js"],
+    languageOptions: {
+      globals: {
+        process: "readonly",
+      },
+    },
+  },
 ];
