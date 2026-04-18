@@ -1,14 +1,14 @@
-//\! Binderbase — local-first TCG scanner and collection manager.
-//\!
-//\! Crate layout (see `docs/ARCHITECTURE.md`):
-//\!
-//\! - [`core`]: game-agnostic domain types and the app-wide `Error`.
-//\! - [`games`]: per-game catalog adapters (MTG via Scryfall, Pokémon via PTCGAPI).
-//\! - [`storage`]: SQLite connection and migrations.
-//\! - [`collection`]: CRUD over the user's owned cards.
-//\! - [`pricing`]: local price cache + lookup.
-//\! - [`scanning`]: image-to-card pipeline.
-//\! - [`commands`]: Tauri command surface exposed to the frontend.
+//! Binderbase — local-first TCG scanner and collection manager.
+//!
+//! Crate layout (see `docs/ARCHITECTURE.md`):
+//!
+//! - [`core`]: game-agnostic domain types and the app-wide `Error`.
+//! - [`games`]: per-game catalog adapters (MTG via Scryfall, Pokémon via PTCGAPI).
+//! - [`storage`]: SQLite connection and migrations.
+//! - [`collection`]: CRUD over the user's owned cards.
+//! - [`pricing`]: local price cache + lookup.
+//! - [`scanning`]: image-to-card pipeline.
+//! - [`commands`]: Tauri command surface exposed to the frontend.
 
 pub mod collection;
 pub mod commands;
@@ -36,7 +36,7 @@ pub fn run() {
     tauri::Builder::default()
         .plugin(tauri_plugin_opener::init())
         .manage(state)
-        .invoke_handler(tauri::generate_handler\![
+        .invoke_handler(tauri::generate_handler![
             commands::app_info,
             commands::fetch_card,
             commands::collection_list,
@@ -45,6 +45,6 @@ pub fn run() {
             commands::pricing_get_cached,
             commands::scan_identify,
         ])
-        .run(tauri::generate_context\!())
+        .run(tauri::generate_context!())
         .expect("error while running tauri application");
 }

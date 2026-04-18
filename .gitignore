@@ -20,7 +20,7 @@ src-tauri/gen/android/
 # ---------- Env / secrets ----------
 .env
 .env.*
-\!.env.example
+!.env.example
 *.pem
 *.key
 *.keystore
@@ -46,8 +46,8 @@ lerna-debug.log*
 
 # ---------- Editor / OS ----------
 .vscode/*
-\!.vscode/extensions.json
-\!.vscode/settings.recommended.json
+!.vscode/extensions.json
+!.vscode/settings.recommended.json
 .idea/
 *.sw?
 *.suo

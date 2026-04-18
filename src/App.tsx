@@ -19,7 +19,7 @@ function App(): ReactElement {
     api
       .appInfo()
       .then((v) => {
-        if (\!cancelled) setInfo(v);
+        if (!cancelled) setInfo(v);
       })
       .catch(() => {
         // Non-fatal; the nav just won't show a version chip.
