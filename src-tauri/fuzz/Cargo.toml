@@ -1,0 +1,28 @@
+[package]
+name = "binderbase-fuzz"
+version = "0.0.0"
+publish = false
+edition = "2021"
+
+[package.metadata]
+cargo-fuzz = true
+
+[dependencies]
+libfuzzer-sys = "0.4"
+
+[dependencies.binderbase_lib]
+path = ".."
+package = "binderbase"
+
+[dependencies.rusqlite]
+version = "0.31"
+features = ["bundled"]
+
+# Prevent this from interfering with workspaces
+[workspace]
+members = ["."]
+
+[[bin]]
+name = "csv_import_preview"
+path = "fuzz_targets/csv_import_preview.rs"
+doc = false
