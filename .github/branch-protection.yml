@@ -1,0 +1,24 @@
+# Branch protection policy for Binderbase.
+# Applied as a GitHub ruleset on 'main' by repo admin.
+#
+# This file documents the intended ruleset configuration. GitHub does not
+# consume it directly — Matt applies it via the repository Settings UI.
+
+rules_for: main
+require_pull_request:
+  required_approvals: 1
+  dismiss_stale_reviews: true
+  require_code_owner_review: false # single-maintainer for now
+require_status_checks:
+  strict: true # branch must be up to date
+  checks:
+    - ci / lint
+    - ci / test
+    - ci / audit
+    - codeql / analyze (javascript-typescript)
+    - codeql / analyze (actions)
+    - cargo-deny
+require_signed_commits: false # opt-in when contributors are comfortable with gpg/ssh signing
+require_linear_history: true
+block_force_pushes: true
+restrict_deletions: true

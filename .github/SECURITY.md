@@ -65,3 +65,9 @@ We will not pursue legal action against researchers who:
 - Avoid privacy violations, destruction of data, and interruption of service.
 - Only interact with their own installations and accounts.
 - Give us reasonable time to remediate before disclosure.
+
+## Branch protection
+
+The `main` branch is protected by a GitHub ruleset. The intended policy is
+documented in [`.github/branch-protection.yml`](branch-protection.yml). The
+repo admin applies the ruleset via the GitHub UI.

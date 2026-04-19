@@ -6,8 +6,7 @@ on:
     tags:
       - "v*"
 
-permissions:
-  contents: write
+permissions: {}
 
 concurrency:
   group: release-${{ github.ref }}
@@ -17,6 +16,8 @@ jobs:
   build:
     name: Build (${{ matrix.os }})
     runs-on: ${{ matrix.os }}
+    permissions:
+      contents: write
     strategy:
       fail-fast: false
       matrix:
@@ -101,4 +102,38 @@ jobs:
         with:
           tag_name: ${{ github.ref_name }}
           files: assets/SHA256SUMS.txt
+          draft: true
+
+  sign:
+    name: Sign release artifacts
+    needs: checksums
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      id-token: write
+    steps:
+      - name: Install cosign
+        uses: sigstore/cosign-installer@cad07c2e89fa2edd6e2d7bab4c1aa38e53f76003 # v4.1.1
+
+      - name: Download release assets
+        uses: robinraju/release-downloader@a96f54c1b5f5e09e47d9504526e96febd949d4c2 # v1.11
+        with:
+          tag: ${{ github.ref_name }}
+          fileName: "*"
+          out-file-path: assets
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Sign each artifact
+        run: |
+          cd assets
+          for artifact in *; do
+            echo "Signing $artifact ..."
+            cosign sign-blob --yes --bundle "${artifact}.bundle" "$artifact"
+          done
+
+      - name: Upload signatures
+        uses: softprops/action-gh-release@3bb12739c298aeb8a4eeaf626c5b8d85266b0e65 # v2.6.2
+        with:
+          tag_name: ${{ github.ref_name }}
+          files: assets/*.bundle
           draft: true

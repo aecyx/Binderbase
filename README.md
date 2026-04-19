@@ -70,6 +70,26 @@ warning:
 You can verify the download using the `SHA256SUMS.txt` file attached to each
 [release](https://github.com/aecyx/Binderbase/releases).
 
+### Verifying with cosign
+
+Release artifacts are signed using **keyless signing via GitHub OIDC +
+Sigstore Fulcio** — no private key management on our side. Every signature is
+publicly auditable in the [Rekor](https://rekor.sigstore.dev/) transparency
+log. Each release asset has a corresponding `.bundle` file containing the
+signature and certificate.
+
+To verify a download (requires [cosign](https://docs.sigstore.dev/cosign/system_config/installation/) v3+):
+
+```bash
+cosign verify-blob \
+  --bundle Binderbase_1.0.0-rc.1_x64.msi.bundle \
+  --certificate-identity-regexp 'https://github.com/aecyx/Binderbase/\.github/workflows/release\.yml@.+' \
+  --certificate-oidc-issuer 'https://token.actions.githubusercontent.com' \
+  Binderbase_1.0.0-rc.1_x64.msi
+```
+
+Replace the file names with the actual artifact you downloaded.
+
 ## Scanning limitations
 
 The card scanner currently works best with **cleanly cropped card images**
