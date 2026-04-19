@@ -43,7 +43,9 @@ pub fn run(conn: &Connection) -> Result<()> {
     if current < 2 {
         apply_v2(conn)?;
     }
-    // Future: if current < 3 { apply_v3(conn)?; }
+    if current < 3 {
+        apply_v3(conn)?;
+    }
 
     Ok(())
 }
@@ -61,6 +63,15 @@ fn apply_v2(conn: &Connection) -> Result<()> {
     conn.execute_batch(include_str!("schema_v2.sql"))?;
     conn.execute(
         "INSERT INTO schema_version (version, applied_at) VALUES (2, datetime('now'))",
+        [],
+    )?;
+    Ok(())
+}
+
+fn apply_v3(conn: &Connection) -> Result<()> {
+    conn.execute_batch(include_str!("schema_v3.sql"))?;
+    conn.execute(
+        "INSERT INTO schema_version (version, applied_at) VALUES (3, datetime('now'))",
         [],
     )?;
     Ok(())
@@ -132,7 +143,7 @@ mod tests {
         let version: u32 = conn
             .query_row("SELECT MAX(version) FROM schema_version", [], |r| r.get(0))
             .unwrap();
-        assert_eq!(version, 2);
+        assert_eq!(version, SCHEMA_VERSION);
 
         // v1 data is intact.
         let name: String = conn
@@ -189,6 +200,7 @@ mod tests {
             .unwrap();
 
         for expected in &[
+            "card_hashes",
             "cards",
             "catalog_imports",
             "collection_entries",
@@ -203,5 +215,39 @@ mod tests {
                 "missing table: {expected} (found: {tables:?})"
             );
         }
+    }
+
+    #[test]
+    fn v2_to_v3_upgrade_adds_card_hashes() {
+        let conn = memory_conn();
+        // Manually run only v1 and v2.
+        conn.execute_batch(
+            "CREATE TABLE IF NOT EXISTS schema_version (
+                version INTEGER PRIMARY KEY,
+                applied_at TEXT NOT NULL
+            );",
+        )
+        .unwrap();
+        apply_v1(&conn).unwrap();
+        apply_v2(&conn).unwrap();
+
+        let version: u32 = conn
+            .query_row("SELECT MAX(version) FROM schema_version", [], |r| r.get(0))
+            .unwrap();
+        assert_eq!(version, 2);
+
+        // Full migration should upgrade to v3.
+        run(&conn).unwrap();
+
+        let version: u32 = conn
+            .query_row("SELECT MAX(version) FROM schema_version", [], |r| r.get(0))
+            .unwrap();
+        assert_eq!(version, 3);
+
+        // card_hashes table exists.
+        let count: i64 = conn
+            .query_row("SELECT COUNT(*) FROM card_hashes", [], |r| r.get(0))
+            .unwrap();
+        assert_eq!(count, 0);
     }
 }

@@ -69,14 +69,23 @@ export function ScanPage(): ReactElement {
           </p>
           {result.matches.length === 0 ? (
             <p className="muted">
-              No matches yet — identification model is still a work in progress. See{" "}
-              <code>src-tauri/src/scanning/mod.rs</code>.
+              No matches. Make sure you&apos;ve built the scan index from the Import / Export page.
             </p>
           ) : (
-            <ol>
+            <ol className="scan-matches">
               {result.matches.map((m) => (
-                <li key={m.card_id}>
-                  <code>{m.card_id}</code> ({Math.round(m.confidence * 100)}%)
+                <li key={`${m.game}-${m.card_id}`} className="scan-match">
+                  {m.image_url && (
+                    <img src={m.image_url} alt={m.name} className="scan-match__thumb" />
+                  )}
+                  <div>
+                    <strong>{m.name}</strong>
+                    <span className="muted"> — {m.set_name}</span>
+                    <br />
+                    <span className="muted">
+                      {Math.round(m.confidence * 100)}% · {m.card_id}
+                    </span>
+                  </div>
                 </li>
               ))}
             </ol>

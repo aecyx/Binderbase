@@ -17,6 +17,8 @@ import type {
   Game,
   ImportProgress,
   ImportStatus,
+  IndexProgress,
+  IndexStatus,
   NewEntry,
   Price,
   ScanResult,
@@ -69,5 +71,10 @@ export const api = {
         image: Array.from(image),
         gameHint: gameHint ?? null,
       }),
+    buildIndex: (game: Game) => invoke<void>("scan_build_index", { game }),
+    cancelBuildIndex: () => invoke<void>("scan_build_index_cancel"),
+    indexStatus: () => invoke<IndexStatus>("scan_index_status"),
+    onIndexProgress: (handler: (progress: IndexProgress) => void) =>
+      listen<IndexProgress>("scan:index:progress", (event) => handler(event.payload)),
   },
 };

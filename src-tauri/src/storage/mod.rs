@@ -17,7 +17,7 @@ use std::path::{Path, PathBuf};
 
 /// Current schema version. Bump this and add a migration when the schema
 /// changes. See `migrations` module below.
-pub const SCHEMA_VERSION: u32 = 2;
+pub const SCHEMA_VERSION: u32 = 3;
 
 /// Qualifiers used to locate the app's per-user data directory.
 /// These become e.g.:

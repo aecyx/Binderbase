@@ -54,7 +54,10 @@ pub fn run() {
             commands::collection::collection_add,
             commands::collection::collection_remove,
             commands::pricing_get_cached,
-            commands::scan_identify,
+            commands::scanning::scan_identify,
+            commands::scanning::scan_build_index,
+            commands::scanning::scan_build_index_cancel,
+            commands::scanning::scan_index_status,
             commands::settings::settings_get_ptcgapi_key,
             commands::settings::settings_set_ptcgapi_key,
         ])

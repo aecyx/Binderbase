@@ -69,6 +69,9 @@ export interface Price {
 export interface ScanMatch {
   game: Game;
   card_id: string;
+  name: string;
+  set_name: string;
+  image_url: string | null;
   confidence: number;
 }
 
@@ -140,4 +143,23 @@ export interface ImportStatus {
   progress: ImportProgress | null;
   last_mtg: ImportRunSummary | null;
   last_pokemon: ImportRunSummary | null;
+}
+
+// ---------- Scan index ----------
+
+export interface IndexProgress {
+  game: Game;
+  processed: number;
+  total: number;
+  stage: string;
+  message: string | null;
+}
+
+export interface IndexStatus {
+  in_progress: boolean;
+  progress: IndexProgress | null;
+  mtg_hashed: number;
+  mtg_total: number;
+  pokemon_hashed: number;
+  pokemon_total: number;
 }

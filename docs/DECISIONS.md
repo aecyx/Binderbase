@@ -174,11 +174,40 @@ the binary. Every user gets the same SQLite version we tested against.
 
 ---
 
-## ADR-0005 (planned): Scan pipeline choice
+## ADR-0005: Perceptual hashing (dHash) for card identification
 
-Not yet written. Placeholder for the decision between perceptual-hash +
-optional OCR (the plan in `ARCHITECTURE.md`) versus a learned model. Will
-be written before scanning leaves stub state.
+**Status**: Accepted  
+**Date**: 2025-01-01  
+**Deciders**: AI-assisted design  
+
+### Context
+
+The scanning feature needs to match a user-uploaded card photo against a
+catalog of ~100k+ cards. The approach must work fully offline, run on
+commodity hardware, and avoid large ML model downloads.
+
+### Decision
+
+Use **dHash (difference hash)** — a 256-bit perceptual hash (17×16 grayscale,
+horizontal difference). Match by Hamming distance with confidence = 1 − (distance / 256).
+
+- Hash storage in SQLite (`card_hashes` table, BLOB column).
+- Index built on-demand by downloading card thumbnails and hashing them.
+- Nearest-neighbor search is a brute-force linear scan (fast enough for <200k entries).
+
+### Alternatives considered
+
+| Option | Pros | Cons |
+|---|---|---|
+| pHash (DCT-based) | More robust to scaling | Heavier computation, external crate |
+| Learned embeddings (CLIP/MobileNet) | Highest accuracy | Large model, ONNX runtime, complex |
+| OCR-first | Works for text-heavy cards | Fails on art-only cards, language issues |
+
+### Consequences
+
+- Simple, zero-dependency implementation (only `image` crate).
+- Good-enough accuracy for near-exact matches; may need augmentation (rotation, crop) later.
+- Linear scan is O(n) per query; if catalog grows past ~500k, consider VP-tree or LSH.
 
 ---
 

@@ -7,6 +7,7 @@
 
 pub mod catalog;
 pub mod collection;
+pub mod scanning;
 pub mod settings;
 
 // Re-export every `#[tauri::command]` so `lib.rs` can reference them as
@@ -16,13 +17,14 @@ pub use catalog::{
     catalog_search, fetch_card,
 };
 pub use collection::{collection_add, collection_list, collection_remove};
+pub use scanning::{scan_build_index, scan_build_index_cancel, scan_identify, scan_index_status};
 pub use settings::{settings_get_ptcgapi_key, settings_set_ptcgapi_key};
 
 use crate::catalog::bulk::ImportController;
 use crate::core::{Error, Game, Result};
 use crate::games;
 use crate::pricing::{self, Price};
-use crate::scanning::{self, ScanResult};
+use crate::scanning::index::IndexController;
 use crate::settings::{KeyringSecrets, SecretStore};
 use crate::storage::Database;
 use serde::Serialize;
@@ -37,6 +39,7 @@ pub struct AppState {
     pub db: Database,
     pub conn: Mutex<rusqlite::Connection>,
     pub import_controller: Arc<ImportController>,
+    pub index_controller: Arc<IndexController>,
     pub secrets: Arc<dyn SecretStore>,
 }
 
@@ -48,6 +51,7 @@ impl AppState {
             db,
             conn: Mutex::new(conn),
             import_controller: Arc::new(ImportController::new()),
+            index_controller: Arc::new(IndexController::new()),
             secrets: Arc::new(KeyringSecrets::new()),
         })
     }
@@ -92,11 +96,4 @@ pub fn pricing_get_cached(
     card_id: String,
 ) -> Result<Vec<Price>> {
     state.with_conn(|c| pricing::get_cached(c, game, &CardId(card_id)))
-}
-
-// ---------- scanning ----------
-
-#[tauri::command]
-pub fn scan_identify(image: Vec<u8>, game_hint: Option<Game>) -> Result<ScanResult> {
-    scanning::identify(&image, game_hint)
 }

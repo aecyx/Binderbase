@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 import type { ReactElement } from "react";
 import { CatalogImportPanel } from "./CatalogImportPanel";
+import { ScanIndexPanel } from "./ScanIndexPanel";
 
 export function ImportExportPage(): ReactElement {
   return (
@@ -8,6 +9,10 @@ export function ImportExportPage(): ReactElement {
       <h1 id="io-heading">Import / Export</h1>
 
       <CatalogImportPanel />
+
+      <hr />
+
+      <ScanIndexPanel />
 
       <hr />
 
