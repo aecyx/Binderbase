@@ -9,7 +9,18 @@
 // here first, and callers get real types.
 
 import { invoke } from "@tauri-apps/api/core";
-import type { AppInfo, Card, CollectionEntry, Game, NewEntry, Price, ScanResult } from "../types";
+import { listen } from "@tauri-apps/api/event";
+import type {
+  AppInfo,
+  Card,
+  CollectionEntry,
+  Game,
+  ImportProgress,
+  ImportStatus,
+  NewEntry,
+  Price,
+  ScanResult,
+} from "../types";
 
 export const api = {
   appInfo: () => invoke<AppInfo>("app_info"),
@@ -34,6 +45,11 @@ export const api = {
         query,
         limit: opts?.limit ?? null,
       }),
+    importStart: () => invoke<void>("catalog_import_start"),
+    importCancel: () => invoke<void>("catalog_import_cancel"),
+    importStatus: () => invoke<ImportStatus>("catalog_import_status"),
+    onImportProgress: (handler: (progress: ImportProgress) => void) =>
+      listen<ImportProgress>("catalog:import:progress", (event) => handler(event.payload)),
   },
 
   collection: {

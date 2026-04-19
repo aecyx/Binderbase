@@ -115,3 +115,29 @@ export function isBinderbaseError(e: unknown): e is BinderbaseError {
     typeof (e as Record<string, unknown>).kind === "string"
   );
 }
+
+// ---------- Bulk import progress ----------
+
+export interface ImportProgress {
+  game: Game | null;
+  stage: string;
+  processed: number;
+  total: number | null;
+  message: string | null;
+}
+
+export interface ImportRunSummary {
+  game: Game;
+  started_at: string;
+  finished_at: string | null;
+  status: string;
+  cards_imported: number;
+  error_message: string | null;
+}
+
+export interface ImportStatus {
+  in_progress: boolean;
+  progress: ImportProgress | null;
+  last_mtg: ImportRunSummary | null;
+  last_pokemon: ImportRunSummary | null;
+}

@@ -39,10 +39,11 @@ pub use controller::{
     TauriProgressSink,
 };
 pub use http::{BulkSource, HttpBulkSource};
-pub use persist::{current_status, latest_run, persist_cards};
+pub use persist::{current_status, latest_run, persist_cards, persist_prices};
 
 use crate::catalog;
 use crate::core::{Error, Game, Result};
+use crate::pricing;
 use crate::storage::Database;
 
 // ---------- constants ----------
@@ -120,9 +121,11 @@ pub async fn run_mtg_import(
         total: None,
         message: Some("Downloading MTG catalog (≈200 MB)".into()),
     });
-    let cards = source.fetch_mtg_cards().await?;
+    let (cards, prices) = source.fetch_mtg_cards().await?;
 
-    persist_cards(db, Game::Mtg, &cards, sink, controller)
+    let count = persist_cards(db, Game::Mtg, &cards, sink, controller)?;
+    persist_prices(db, &prices)?;
+    Ok(count)
 }
 
 /// Full Pokémon pipeline: paginate through PTCGAPI, persist each page's
@@ -151,7 +154,7 @@ pub async fn run_pokemon_import(
         if controller.is_cancelled() {
             return Err(Error::Internal("import cancelled".into()));
         }
-        let (cards, maybe_total) = source.fetch_pokemon_page(page, api_key).await?;
+        let (cards, page_prices, maybe_total) = source.fetch_pokemon_page(page, api_key).await?;
         if cards.is_empty() {
             break;
         }
@@ -162,6 +165,9 @@ pub async fn run_pokemon_import(
         let tx = conn.transaction()?;
         for card in &cards {
             catalog::upsert(&tx, card)?;
+        }
+        for price in &page_prices {
+            pricing::upsert(&tx, price)?;
         }
         tx.commit()?;
         total_imported += cards.len() as u64;
@@ -215,6 +221,7 @@ fn emit_terminal(
 mod tests {
     use super::*;
     use crate::core::{Card, CardId};
+    use crate::pricing::Price;
     use crate::settings;
 
     fn c(game: Game, id: &str, name: &str) -> Card {
@@ -432,17 +439,17 @@ mod tests {
 
     #[async_trait::async_trait]
     impl BulkSource for FakeSource {
-        async fn fetch_mtg_cards(&self) -> Result<Vec<Card>> {
-            Ok(self.mtg.clone())
+        async fn fetch_mtg_cards(&self) -> Result<(Vec<Card>, Vec<Price>)> {
+            Ok((self.mtg.clone(), Vec::new()))
         }
         async fn fetch_pokemon_page(
             &self,
             page: u32,
             _api_key: Option<&str>,
-        ) -> Result<(Vec<Card>, Option<u64>)> {
+        ) -> Result<(Vec<Card>, Vec<Price>, Option<u64>)> {
             let idx = (page as usize).saturating_sub(1);
             let cards = self.pokemon_pages.get(idx).cloned().unwrap_or_default();
-            Ok((cards, self.pokemon_total))
+            Ok((cards, Vec::new(), self.pokemon_total))
         }
     }
 

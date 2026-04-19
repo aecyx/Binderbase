@@ -6,6 +6,7 @@
 
 use crate::catalog;
 use crate::core::{Error, Game, Result};
+use crate::pricing::{self, Price};
 use crate::settings;
 use crate::storage::Database;
 use rusqlite::{params, Connection};
@@ -143,4 +144,20 @@ pub fn current_status(conn: &Connection, controller: &ImportController) -> Resul
 /// Generates a new UUID for an import run.
 pub fn new_import_id() -> String {
     Uuid::new_v4().to_string()
+}
+
+/// Batched upsert of prices extracted during bulk import.
+pub fn persist_prices(db: &Database, prices: &[Price]) -> Result<()> {
+    if prices.is_empty() {
+        return Ok(());
+    }
+    let mut conn = db.connect()?;
+    for chunk in prices.chunks(BATCH_SIZE) {
+        let tx = conn.transaction()?;
+        for price in chunk {
+            pricing::upsert(&tx, price)?;
+        }
+        tx.commit()?;
+    }
+    Ok(())
 }
