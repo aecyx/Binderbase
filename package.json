@@ -31,7 +31,8 @@
     "typecheck": "tsc --noEmit",
     "lint": "eslint . --max-warnings 0",
     "format": "prettier --write .",
-    "format:check": "prettier --check ."
+    "format:check": "prettier --check .",
+    "verify": "pwsh scripts/verify.ps1"
   },
   "dependencies": {
     "@tauri-apps/api": "^2",

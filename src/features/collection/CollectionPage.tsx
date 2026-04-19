@@ -1,8 +1,9 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 import { useCallback, useEffect, useReducer, useState } from "react";
 import type { FormEvent, ReactElement } from "react";
+import { CardSearch } from "../../components/CardSearch";
 import { api } from "../../lib/tauri";
-import type { CardCondition, CollectionEntry, Game, NewEntry } from "../../types";
+import type { Card, CardCondition, CollectionEntry, Game, NewEntry } from "../../types";
 import { GAME_DISPLAY_NAME, isBinderbaseError } from "../../types";
 
 const CONDITIONS: { value: CardCondition; label: string }[] = [
@@ -31,7 +32,7 @@ export function CollectionPage(): ReactElement {
 
   // --- Add-card form state ---
   const [addGame, setAddGame] = useState<Game>("mtg");
-  const [addCardId, setAddCardId] = useState("");
+  const [addCard, setAddCard] = useState<Card | null>(null);
   const [addCondition, setAddCondition] = useState<CardCondition>("near_mint");
   const [addFoil, setAddFoil] = useState(false);
   const [addQty, setAddQty] = useState(1);
@@ -66,7 +67,7 @@ export function CollectionPage(): ReactElement {
   }, [fetchKey]);
 
   function resetForm() {
-    setAddCardId("");
+    setAddCard(null);
     setAddCondition("near_mint");
     setAddFoil(false);
     setAddQty(1);
@@ -75,13 +76,13 @@ export function CollectionPage(): ReactElement {
 
   async function handleAdd(evt: FormEvent) {
     evt.preventDefault();
-    if (!addCardId.trim()) return;
+    if (!addCard) return;
     setAddBusy(true);
     setError(null);
     try {
       const entry: NewEntry = {
         game: addGame,
-        card_id: addCardId.trim(),
+        card_id: addCard.id,
         condition: addCondition,
         foil: addFoil,
         quantity: addQty,
@@ -152,14 +153,12 @@ export function CollectionPage(): ReactElement {
           </div>
 
           <div className="form-row">
-            <label htmlFor="add-card-id">Card ID</label>
-            <input
-              id="add-card-id"
-              type="text"
-              required
-              placeholder="e.g. Scryfall UUID or PTCG id"
-              value={addCardId}
-              onChange={(e) => setAddCardId(e.target.value)}
+            <label htmlFor="add-card-search">Card</label>
+            <CardSearch
+              game={addGame}
+              onSelect={setAddCard}
+              placeholder="Search by card name\u2026"
+              id="add-card-search"
             />
           </div>
 
@@ -213,7 +212,7 @@ export function CollectionPage(): ReactElement {
           </div>
 
           <div className="form-row">
-            <button type="submit" data-variant="primary" disabled={addBusy || !addCardId.trim()}>
+            <button type="submit" data-variant="primary" disabled={addBusy || !addCard}>
               {addBusy ? "Adding…" : "Add to collection"}
             </button>
           </div>

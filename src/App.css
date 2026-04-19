@@ -153,6 +153,59 @@
   border-color: transparent;
 }
 
+/* ---------- Card search autocomplete ---------- */
+
+.card-search {
+  position: relative;
+  flex: 1;
+}
+
+.card-search input {
+  width: 100%;
+}
+
+.card-search__results {
+  position: absolute;
+  z-index: 10;
+  top: 100%;
+  left: 0;
+  right: 0;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  max-height: 18rem;
+  overflow-y: auto;
+  box-shadow: 0 4px 12px rgb(0 0 0 / 0.15);
+}
+
+.card-search__item {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: var(--space-2);
+  padding: var(--space-1) var(--space-2);
+  cursor: pointer;
+}
+
+.card-search__item:hover,
+.card-search__item--active {
+  background: var(--accent);
+  color: var(--bg);
+}
+
+.card-search__item--active .muted,
+.card-search__item:hover .muted {
+  color: inherit;
+}
+
+.card-search__meta {
+  font-size: 0.85rem;
+  white-space: nowrap;
+}
+
 /* ---------- Import panel ---------- */
 
 .btn-primary {
