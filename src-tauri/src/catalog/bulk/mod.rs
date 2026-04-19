@@ -61,7 +61,48 @@ const BATCH_SIZE: usize = 1000;
 /// Max page size PTCGAPI accepts.
 const PTCGAPI_PAGE_SIZE: u32 = 250;
 
+/// How many PTCGAPI pages to fetch concurrently. Conservative enough to
+/// stay under rate limits without a key (~30 req/min ≈ 2 rps), but still
+/// far faster than one-at-a-time.
+const PTCG_CONCURRENT_PAGES: usize = 5;
+
 // ---------- orchestrator ----------
+
+/// Import cards for a specific game (or all games if `game` is `None`).
+/// Called by the spawned task in the command layer.
+pub async fn run_import(
+    db: &Database,
+    source: &dyn BulkSource,
+    sink: &dyn ProgressSink,
+    controller: &ImportController,
+    ptcgapi_key: Option<&str>,
+    game: Option<Game>,
+) -> Result<()> {
+    match game {
+        Some(Game::Mtg) => {
+            let mtg_id = persist::new_import_id();
+            persist::log_import_start(db, &mtg_id, Game::Mtg)?;
+            let mtg_result = run_mtg_import(db, source, sink, controller).await;
+            persist::finalize_import_log(db, &mtg_id, &mtg_result, controller)?;
+            emit_terminal(sink, Some(Game::Mtg), controller, mtg_result.as_ref().err());
+            mtg_result.map(|_| ())
+        }
+        Some(Game::Pokemon) => {
+            let poke_id = persist::new_import_id();
+            persist::log_import_start(db, &poke_id, Game::Pokemon)?;
+            let poke_result = run_pokemon_import(db, source, sink, controller, ptcgapi_key).await;
+            persist::finalize_import_log(db, &poke_id, &poke_result, controller)?;
+            emit_terminal(
+                sink,
+                Some(Game::Pokemon),
+                controller,
+                poke_result.as_ref().err(),
+            );
+            poke_result.map(|_| ())
+        }
+        None => run_import_all(db, source, sink, controller, ptcgapi_key).await,
+    }
+}
 
 /// Import everything — MTG first, then Pokémon. Called by the spawned task
 /// in the command layer.
@@ -128,8 +169,14 @@ pub async fn run_mtg_import(
     Ok(count)
 }
 
-/// Full Pokémon pipeline: paginate through PTCGAPI, persist each page's
-/// cards as we go (no single 200 MB buffer to hold).
+/// Full Pokémon pipeline: paginate through PTCGAPI with concurrent page
+/// fetches, persist each page's cards as they arrive.
+///
+/// Strategy:
+/// 1. Fetch page 1 to learn `totalCount`.
+/// 2. Compute remaining pages and fetch them concurrently (up to
+///    `PTCG_CONCURRENT_PAGES` in flight at once).
+/// 3. Persist each page's cards+prices in a DB transaction as it arrives.
 pub async fn run_pokemon_import(
     db: &Database,
     source: &dyn BulkSource,
@@ -142,49 +189,94 @@ pub async fn run_pokemon_import(
         stage: "downloading".into(),
         processed: 0,
         total: None,
-        message: Some("Fetching Pokémon TCG catalog (paginated)".into()),
+        message: Some("Fetching Pokémon TCG catalog…".into()),
     });
 
+    // -- Phase 1: fetch first page to learn total --
+    if controller.is_cancelled() {
+        return Err(Error::Internal("import cancelled".into()));
+    }
+    let (first_cards, first_prices, maybe_total) = source.fetch_pokemon_page(1, api_key).await?;
+    if first_cards.is_empty() {
+        persist::stamp_last_imported(&db.connect()?, Game::Pokemon)?;
+        return Ok(0);
+    }
+
+    let announced_total = maybe_total;
+    let total_pages = if let Some(total) = announced_total {
+        ((total as f64) / (PTCGAPI_PAGE_SIZE as f64)).ceil() as u32
+    } else {
+        // Unknown total — fall back to sequential (stops on short page).
+        u32::MAX
+    };
+
+    // Persist first page.
     let mut conn = db.connect()?;
-    let mut total_imported = 0u64;
-    let mut announced_total: Option<u64> = None;
-    let mut page: u32 = 1;
-
-    loop {
-        if controller.is_cancelled() {
-            return Err(Error::Internal("import cancelled".into()));
-        }
-        let (cards, page_prices, maybe_total) = source.fetch_pokemon_page(page, api_key).await?;
-        if cards.is_empty() {
-            break;
-        }
-        if announced_total.is_none() {
-            announced_total = maybe_total;
-        }
-
+    {
         let tx = conn.transaction()?;
-        for card in &cards {
+        for card in &first_cards {
             catalog::upsert(&tx, card)?;
         }
-        for price in &page_prices {
+        for price in &first_prices {
             pricing::upsert(&tx, price)?;
         }
         tx.commit()?;
-        total_imported += cards.len() as u64;
+    }
+    let mut total_imported = first_cards.len() as u64;
+    let first_was_short = first_cards.len() < PTCGAPI_PAGE_SIZE as usize;
 
-        sink.emit(ImportProgress {
-            game: Some(Game::Pokemon),
-            stage: "importing".into(),
-            processed: total_imported,
-            total: announced_total,
-            message: None,
-        });
+    sink.emit(ImportProgress {
+        game: Some(Game::Pokemon),
+        stage: "importing".into(),
+        processed: total_imported,
+        total: announced_total,
+        message: None,
+    });
 
-        // Last page is typically < page size.
-        if cards.len() < PTCGAPI_PAGE_SIZE as usize {
-            break;
+    if first_was_short || total_pages <= 1 {
+        persist::stamp_last_imported(&conn, Game::Pokemon)?;
+        return Ok(total_imported);
+    }
+
+    // -- Phase 2: fetch remaining pages concurrently --
+    let remaining_pages: Vec<u32> = (2..=total_pages).collect();
+
+    for chunk in remaining_pages.chunks(PTCG_CONCURRENT_PAGES) {
+        if controller.is_cancelled() {
+            return Err(Error::Internal("import cancelled".into()));
         }
-        page += 1;
+
+        // Fire all pages in this chunk concurrently.
+        let futures: Vec<_> = chunk
+            .iter()
+            .map(|&p| source.fetch_pokemon_page(p, api_key))
+            .collect();
+        let results = futures::future::join_all(futures).await;
+
+        // Persist each page's results.
+        for page_result in results {
+            let (cards, page_prices, _) = page_result?;
+            if cards.is_empty() {
+                continue;
+            }
+            let tx = conn.transaction()?;
+            for card in &cards {
+                catalog::upsert(&tx, card)?;
+            }
+            for price in &page_prices {
+                pricing::upsert(&tx, price)?;
+            }
+            tx.commit()?;
+            total_imported += cards.len() as u64;
+
+            sink.emit(ImportProgress {
+                game: Some(Game::Pokemon),
+                stage: "importing".into(),
+                processed: total_imported,
+                total: announced_total,
+                message: None,
+            });
+        }
     }
 
     persist::stamp_last_imported(&conn, Game::Pokemon)?;

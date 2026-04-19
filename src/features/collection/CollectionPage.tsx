@@ -245,7 +245,7 @@ export function CollectionPage(): ReactElement {
             <CardSearch
               game={addGame}
               onSelect={setAddCard}
-              placeholder="Search by card name\u2026"
+              placeholder="Search by card name"
               id="add-card-search"
             />
           </div>

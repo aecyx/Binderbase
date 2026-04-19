@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
-import { useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import type { ReactElement } from "react";
 import { api } from "../../lib/tauri";
 import type { CardCondition, Game, ScanMatch, ScanResult } from "../../types";
@@ -90,12 +90,60 @@ export function ScanPage(): ReactElement {
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
 
-  async function handleFile(file: File) {
+  // -- webcam --
+  const [camActive, setCamActive] = useState(false);
+  const [camError, setCamError] = useState<string | null>(null);
+  const videoRef = useRef<HTMLVideoElement>(null);
+  const streamRef = useRef<MediaStream | null>(null);
+  const canvasRef = useRef<HTMLCanvasElement>(null);
+
+  const stopCam = useCallback(() => {
+    streamRef.current?.getTracks().forEach((t) => t.stop());
+    streamRef.current = null;
+    setCamActive(false);
+  }, []);
+
+  // Clean up on unmount.
+  useEffect(() => stopCam, [stopCam]);
+
+  async function startCam() {
+    setCamError(null);
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({
+        video: { facingMode: "environment", width: { ideal: 1280 }, height: { ideal: 720 } },
+        audio: false,
+      });
+      streamRef.current = stream;
+      if (videoRef.current) {
+        videoRef.current.srcObject = stream;
+      }
+      setCamActive(true);
+    } catch (e) {
+      setCamError(e instanceof Error ? e.message : String(e));
+    }
+  }
+
+  /** Capture a single frame from the webcam and send it for identification. */
+  async function captureFrame() {
+    const video = videoRef.current;
+    const canvas = canvasRef.current;
+    if (!video || !canvas) return;
+    canvas.width = video.videoWidth;
+    canvas.height = video.videoHeight;
+    const ctx = canvas.getContext("2d");
+    if (!ctx) return;
+    ctx.drawImage(video, 0, 0);
+    const blob = await new Promise<Blob | null>((resolve) => canvas.toBlob(resolve, "image/jpeg"));
+    if (!blob) return;
+    const buf = new Uint8Array(await blob.arrayBuffer());
+    await identifyBytes(buf);
+  }
+
+  async function identifyBytes(buf: Uint8Array) {
     setError(null);
     setResult(null);
     setLoading(true);
     try {
-      const buf = new Uint8Array(await file.arrayBuffer());
       const res = await api.scanning.identify(buf, game);
       setResult(res);
     } catch (e) {
@@ -105,12 +153,15 @@ export function ScanPage(): ReactElement {
     }
   }
 
+  async function handleFile(file: File) {
+    const buf = new Uint8Array(await file.arrayBuffer());
+    await identifyBytes(buf);
+  }
+
   return (
     <section aria-labelledby="scan-heading">
       <h1 id="scan-heading">Scan a card</h1>
-      <p className="muted">
-        Load an image from your drive. Webcam and phone-camera capture come later.
-      </p>
+      <p className="muted">Use your webcam or load an image from your drive.</p>
 
       <div className="form-row">
         <label htmlFor="game-select">Game</label>
@@ -120,8 +171,44 @@ export function ScanPage(): ReactElement {
         </select>
       </div>
 
+      {/* -- Webcam section -- */}
+      <div className="scan-source">
+        {!camActive ? (
+          <button type="button" data-variant="primary" onClick={startCam} disabled={loading}>
+            Open webcam
+          </button>
+        ) : (
+          <div className="webcam-container">
+            {/* Webcam feed — no caption track needed for live video */}
+            <video ref={videoRef} autoPlay playsInline className="webcam-preview" />
+            <canvas ref={canvasRef} hidden />
+            <div className="form-row">
+              <button
+                type="button"
+                data-variant="primary"
+                onClick={captureFrame}
+                disabled={loading}
+              >
+                {loading ? "Identifying…" : "Capture & identify"}
+              </button>
+              <button type="button" onClick={stopCam}>
+                Close webcam
+              </button>
+            </div>
+          </div>
+        )}
+        {camError && (
+          <p role="alert" className="error">
+            Webcam error: {camError}
+          </p>
+        )}
+      </div>
+
+      <hr />
+
+      {/* -- File upload fallback -- */}
       <div className="form-row">
-        <label htmlFor="scan-file">Card image</label>
+        <label htmlFor="scan-file">Or upload an image</label>
         <input
           id="scan-file"
           type="file"

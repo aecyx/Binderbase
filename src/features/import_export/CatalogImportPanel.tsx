@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 import { useCallback, useEffect, useState } from "react";
 import { api } from "../../lib/tauri";
-import type { ImportProgress, ImportRunSummary, ImportStatus } from "../../types";
+import type { Game, ImportProgress, ImportRunSummary, ImportStatus } from "../../types";
 import { GAME_DISPLAY_NAME } from "../../types";
 
 export function CatalogImportPanel() {
@@ -42,11 +42,11 @@ export function CatalogImportPanel() {
     };
   }, [refresh]);
 
-  const handleStart = async () => {
+  const handleStart = async (game?: Game) => {
     setStarting(true);
     setError(null);
     try {
-      await api.catalog.importStart();
+      await api.catalog.importStart(game);
       await refresh();
     } catch (e: unknown) {
       setError(e instanceof Error ? e.message : String(e));
@@ -68,16 +68,27 @@ export function CatalogImportPanel() {
   return (
     <div className="import-panel">
       <h2>Catalog Import</h2>
-      <p className="muted">Download the full card catalog (and prices) for all supported games.</p>
+      <p className="muted">Download the full card catalog (and prices) for the games you play.</p>
 
       <div className="import-panel__actions">
         <button
           type="button"
-          onClick={handleStart}
+          onClick={() => handleStart("mtg")}
           disabled={inProgress || starting}
           className="btn-primary"
         >
-          {starting ? "Starting\u2026" : "Import All Games"}
+          {starting ? "Starting\u2026" : `Import ${GAME_DISPLAY_NAME.mtg}`}
+        </button>
+        <button
+          type="button"
+          onClick={() => handleStart("pokemon")}
+          disabled={inProgress || starting}
+          className="btn-primary"
+        >
+          {starting ? "Starting\u2026" : `Import ${GAME_DISPLAY_NAME.pokemon}`}
+        </button>
+        <button type="button" onClick={() => handleStart()} disabled={inProgress || starting}>
+          {starting ? "Starting\u2026" : "Import all games"}
         </button>
         {inProgress && (
           <button type="button" onClick={handleCancel}>

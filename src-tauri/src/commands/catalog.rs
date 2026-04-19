@@ -70,10 +70,15 @@ pub fn catalog_search(
     state.with_conn(|c| catalog::search(c, game, &query, effective_limit))
 }
 
-/// Kick off a background bulk-import of all supported games. Returns
-/// immediately — progress is pushed via `catalog:import:progress` events.
+/// Kick off a background bulk-import. Pass `game` to import only one game,
+/// or `None` to import all supported games. Returns immediately — progress
+/// is pushed via `catalog:import:progress` events.
 #[tauri::command]
-pub async fn catalog_import_start(state: State<'_, AppState>, app: AppHandle) -> Result<()> {
+pub async fn catalog_import_start(
+    state: State<'_, AppState>,
+    app: AppHandle,
+    game: Option<Game>,
+) -> Result<()> {
     if !state.import_controller.try_start() {
         return Err(Error::InvalidInput(
             "a catalog import is already running".into(),
@@ -97,7 +102,7 @@ pub async fn catalog_import_start(state: State<'_, AppState>, app: AppHandle) ->
         let sink = TauriProgressSink::new(app, Arc::clone(&controller));
         let api_key = settings::get_ptcgapi_key(secrets.as_ref()).ok().flatten();
         let result =
-            bulk::run_import_all(&db, &source, &sink, &controller, api_key.as_deref()).await;
+            bulk::run_import(&db, &source, &sink, &controller, api_key.as_deref(), game).await;
         if let Err(e) = &result {
             tracing::warn!(error = %e, "catalog import finished with error");
         }

@@ -50,7 +50,7 @@ export const api = {
         query,
         limit: opts?.limit ?? null,
       }),
-    importStart: () => invoke<void>("catalog_import_start"),
+    importStart: (game?: Game) => invoke<void>("catalog_import_start", { game: game ?? null }),
     importCancel: () => invoke<void>("catalog_import_cancel"),
     importStatus: () => invoke<ImportStatus>("catalog_import_status"),
     onImportProgress: (handler: (progress: ImportProgress) => void) =>

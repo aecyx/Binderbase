@@ -59,6 +59,9 @@ uuid = { version = "1", features = ["v4", "serde"] }
 # can be mocked in tests).
 async-trait = "0.1"
 
+# Async combinators (join_all for concurrent page fetches).
+futures = "0.3"
+
 # CSV parsing and writing (collection import/export).
 csv = "1"
 

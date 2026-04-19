@@ -1,9 +1,9 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import type { ReactElement } from "react";
 import { CardSearch } from "../../components/CardSearch";
 import { api } from "../../lib/tauri";
-import type { Card, Game, Price } from "../../types";
+import type { Card, Game, ImportStatus, Price } from "../../types";
 import { GAME_DISPLAY_NAME, isBinderbaseError } from "../../types";
 
 export function PricesPage(): ReactElement {
@@ -13,6 +13,19 @@ export function PricesPage(): ReactElement {
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const [refreshing, setRefreshing] = useState(false);
+  const [importStatus, setImportStatus] = useState<ImportStatus | null>(null);
+
+  useEffect(() => {
+    api.catalog
+      .importStatus()
+      .then(setImportStatus)
+      .catch(() => {});
+  }, []);
+
+  const hasCatalog =
+    importStatus !== null &&
+    ((importStatus.last_mtg !== null && importStatus.last_mtg.status === "finished") ||
+      (importStatus.last_pokemon !== null && importStatus.last_pokemon.status === "finished"));
 
   async function handleSelect(selected: Card) {
     setError(null);
@@ -54,6 +67,13 @@ export function PricesPage(): ReactElement {
         Live catalog lookup + cached price history. Prices are pulled from Scryfall (MTG) or the
         Pokémon TCG API.
       </p>
+
+      {importStatus !== null && !hasCatalog && (
+        <p role="status" className="notice">
+          No card catalog imported yet. Go to <strong>Import / Export</strong> and run a catalog
+          import before searching for prices.
+        </p>
+      )}
 
       <div className="form-row">
         <label htmlFor="price-game">Game</label>
