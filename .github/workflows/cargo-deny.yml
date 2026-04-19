@@ -23,4 +23,4 @@ jobs:
         run: cargo install cargo-deny --locked --quiet
 
       - name: Run cargo-deny
-        run: cargo deny --config src-tauri/deny.toml --all-features --manifest-path src-tauri/Cargo.toml check advisories bans licenses sources
+        run: cargo deny --manifest-path src-tauri/Cargo.toml check --config src-tauri/deny.toml --all-features advisories bans licenses sources
