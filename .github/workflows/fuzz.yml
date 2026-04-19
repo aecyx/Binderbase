@@ -37,10 +37,12 @@ jobs:
 
       - name: Run fuzzer — ${{ matrix.target }}
         working-directory: src-tauri
+        env:
+          FUZZ_DURATION: ${{ github.event.inputs.duration || '300' }}
+          FUZZ_TARGET: ${{ matrix.target }}
         run: |
-          DURATION="${{ github.event.inputs.duration || '300' }}"
-          cargo +nightly fuzz run ${{ matrix.target }} -- \
-            -max_total_time="${DURATION}" \
+          cargo +nightly fuzz run "$FUZZ_TARGET" -- \
+            -max_total_time="$FUZZ_DURATION" \
             -max_len=65536
 
       - name: Upload crash artifacts
