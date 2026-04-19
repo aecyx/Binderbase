@@ -6,15 +6,19 @@
 //! the domain modules (core, games, collection, pricing, scanning).
 
 use crate::catalog;
+use crate::catalog::bulk::{
+    self, HttpBulkSource, ImportController, ImportStatus, TauriProgressSink,
+};
 use crate::collection::{self, CollectionEntry, NewEntry};
 use crate::core::{Card, CardId, Error, Game, Result};
 use crate::games;
 use crate::pricing::{self, Price};
 use crate::scanning::{self, ScanResult};
+use crate::settings::{self, KeyringSecrets, SecretStore};
 use crate::storage::Database;
 use serde::Serialize;
-use std::sync::Mutex;
-use tauri::State;
+use std::sync::{Arc, Mutex};
+use tauri::{AppHandle, State};
 
 /// Default page size for `catalog_search`. Matches the autocomplete UX —
 /// big enough to cover realistic matches, small enough not to stall a render.
@@ -29,6 +33,8 @@ pub struct AppState {
     // Single serialized connection for write operations to keep logic simple
     // in 0.1; swap for a pool when concurrency actually matters.
     pub conn: Mutex<rusqlite::Connection>,
+    pub import_controller: Arc<ImportController>,
+    pub secrets: Arc<dyn SecretStore>,
 }
 
 impl AppState {
@@ -38,6 +44,8 @@ impl AppState {
         Ok(Self {
             db,
             conn: Mutex::new(conn),
+            import_controller: Arc::new(ImportController::new()),
+            secrets: Arc::new(KeyringSecrets::new()),
         })
     }
 
@@ -166,4 +174,73 @@ pub fn pricing_get_cached(
 #[tauri::command]
 pub fn scan_identify(image: Vec<u8>, game_hint: Option<Game>) -> Result<ScanResult> {
     scanning::identify(&image, game_hint)
+}
+
+// ---------- catalog import ----------
+
+/// Kick off a background bulk-import of all supported games. Returns
+/// immediately — progress is pushed via `catalog:import:progress` events.
+#[tauri::command]
+pub async fn catalog_import_start(state: State<'_, AppState>, app: AppHandle) -> Result<()> {
+    if !state.import_controller.try_start() {
+        return Err(Error::InvalidInput(
+            "a catalog import is already running".into(),
+        ));
+    }
+
+    let controller = Arc::clone(&state.import_controller);
+    let secrets = Arc::clone(&state.secrets);
+
+    // Build the DB path so the spawned task can open its own connections
+    // (we can't send AppState across an await boundary).
+    let db = Database::at(state.db.path());
+
+    tauri::async_runtime::spawn(async move {
+        let source = match HttpBulkSource::new() {
+            Ok(s) => s,
+            Err(e) => {
+                tracing::error!(error = %e, "failed to create HTTP client for import");
+                controller.finish();
+                return;
+            }
+        };
+        let sink = TauriProgressSink::new(app, Arc::clone(&controller));
+        let api_key = settings::get_ptcgapi_key(secrets.as_ref()).ok().flatten();
+        let result =
+            bulk::run_import_all(&db, &source, &sink, &controller, api_key.as_deref()).await;
+        if let Err(e) = &result {
+            tracing::warn!(error = %e, "catalog import finished with error");
+        }
+        controller.finish();
+    });
+
+    Ok(())
+}
+
+/// Request cancellation of a running import. No-op if nothing is running.
+#[tauri::command]
+pub fn catalog_import_cancel(state: State<'_, AppState>) -> Result<()> {
+    state.import_controller.cancel();
+    Ok(())
+}
+
+/// Poll the current import status (in-progress flag, latest progress
+/// snapshot, last completed runs per game).
+#[tauri::command]
+pub fn catalog_import_status(state: State<'_, AppState>) -> Result<ImportStatus> {
+    state.with_conn(|c| bulk::current_status(c, &state.import_controller))
+}
+
+// ---------- settings ----------
+
+/// Read the stored Pokémon TCG API key (or `None` if not set).
+#[tauri::command]
+pub fn settings_get_ptcgapi_key(state: State<'_, AppState>) -> Result<Option<String>> {
+    settings::get_ptcgapi_key(state.secrets.as_ref())
+}
+
+/// Store (or clear) the Pokémon TCG API key. Empty/whitespace → delete.
+#[tauri::command]
+pub fn settings_set_ptcgapi_key(state: State<'_, AppState>, value: String) -> Result<()> {
+    settings::set_ptcgapi_key(state.secrets.as_ref(), &value)
 }

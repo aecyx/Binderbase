@@ -40,7 +40,10 @@ pub fn run(conn: &Connection) -> Result<()> {
     if current < 1 {
         apply_v1(conn)?;
     }
-    // Future: if current < 2 { apply_v2(conn)?; }
+    if current < 2 {
+        apply_v2(conn)?;
+    }
+    // Future: if current < 3 { apply_v3(conn)?; }
 
     Ok(())
 }
@@ -49,6 +52,15 @@ fn apply_v1(conn: &Connection) -> Result<()> {
     conn.execute_batch(include_str!("schema_v1.sql"))?;
     conn.execute(
         "INSERT INTO schema_version (version, applied_at) VALUES (1, datetime('now'))",
+        [],
+    )?;
+    Ok(())
+}
+
+fn apply_v2(conn: &Connection) -> Result<()> {
+    conn.execute_batch(include_str!("schema_v2.sql"))?;
+    conn.execute(
+        "INSERT INTO schema_version (version, applied_at) VALUES (2, datetime('now'))",
         [],
     )?;
     Ok(())
@@ -66,14 +78,14 @@ mod tests {
     }
 
     #[test]
-    fn fresh_database_migrates_to_v1() {
+    fn fresh_database_migrates_to_latest() {
         let conn = memory_conn();
         run(&conn).unwrap();
 
         let version: u32 = conn
             .query_row("SELECT MAX(version) FROM schema_version", [], |r| r.get(0))
             .unwrap();
-        assert_eq!(version, 1);
+        assert_eq!(version, SCHEMA_VERSION);
     }
 
     #[test]
@@ -86,7 +98,61 @@ mod tests {
         let version: u32 = conn
             .query_row("SELECT MAX(version) FROM schema_version", [], |r| r.get(0))
             .unwrap();
-        assert_eq!(version, 1);
+        assert_eq!(version, SCHEMA_VERSION);
+    }
+
+    #[test]
+    fn v1_to_v2_upgrade_adds_new_tables_without_rewriting_v1() {
+        // A DB that stopped at v1 should upgrade cleanly when the code moves
+        // to v2 — without re-applying v1's DDL.
+        let conn = memory_conn();
+        // `run()` normally creates schema_version; since we're calling
+        // apply_v1 directly we need the table to exist first.
+        conn.execute_batch(
+            "CREATE TABLE IF NOT EXISTS schema_version (
+                version INTEGER PRIMARY KEY,
+                applied_at TEXT NOT NULL
+            );",
+        )
+        .unwrap();
+        apply_v1(&conn).unwrap();
+
+        // Simulate an unexpected user row that would be clobbered by a naive
+        // re-run of v1's `INSERT OR IGNORE` (it's OR IGNORE so it's safe, but
+        // still a good canary against accidental re-apply).
+        conn.execute(
+            "INSERT INTO cards (game, card_id, name, set_code, set_name, collector_number)
+             VALUES ('mtg', 'probe', 'Probe', 'X', 'X', '1')",
+            [],
+        )
+        .unwrap();
+
+        run(&conn).unwrap();
+
+        let version: u32 = conn
+            .query_row("SELECT MAX(version) FROM schema_version", [], |r| r.get(0))
+            .unwrap();
+        assert_eq!(version, 2);
+
+        // v1 data is intact.
+        let name: String = conn
+            .query_row(
+                "SELECT name FROM cards WHERE game = 'mtg' AND card_id = 'probe'",
+                [],
+                |r| r.get(0),
+            )
+            .unwrap();
+        assert_eq!(name, "Probe");
+
+        // v2 tables exist and are empty.
+        let settings_count: i64 = conn
+            .query_row("SELECT COUNT(*) FROM settings", [], |r| r.get(0))
+            .unwrap();
+        assert_eq!(settings_count, 0);
+        let imports_count: i64 = conn
+            .query_row("SELECT COUNT(*) FROM catalog_imports", [], |r| r.get(0))
+            .unwrap();
+        assert_eq!(imports_count, 0);
     }
 
     #[test]
@@ -110,7 +176,7 @@ mod tests {
     }
 
     #[test]
-    fn v1_creates_expected_tables() {
+    fn latest_schema_creates_expected_tables() {
         let conn = memory_conn();
         run(&conn).unwrap();
 
@@ -124,11 +190,13 @@ mod tests {
 
         for expected in &[
             "cards",
+            "catalog_imports",
             "collection_entries",
             "games",
             "prices",
             "scan_events",
             "schema_version",
+            "settings",
         ] {
             assert!(
                 tables.iter().any(|t| t == expected),

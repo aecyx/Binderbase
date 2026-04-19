@@ -8,12 +8,14 @@
 //! 1. **Fetch-on-demand.** Any successful `games::fetch_card` result is
 //!    upserted here via [`commands::fetch_card`], so repeat lookups skip the
 //!    network.
-//! 2. **Bulk import.** A user-initiated "Update catalog" action (Phase 2 of
-//!    the 1.0 roadmap) will ingest Scryfall bulk data and paginate PTCGAPI.
-//!    Not yet implemented.
+//! 2. **Bulk import.** A user-initiated "Update catalog" action — see the
+//!    [`bulk`] submodule. Runs on a background task, emits progress events,
+//!    supports cancellation.
 //!
 //! Callers pass a `&Connection` so this module stays I/O-free and
 //! transaction-friendly. The command layer owns the locking.
+
+pub mod bulk;
 
 use crate::core::{Card, CardId, Error, Game, Result};
 use rusqlite::{params, Connection};

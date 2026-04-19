@@ -8,6 +8,7 @@
 //! - [`storage`]: SQLite connection and migrations.
 //! - [`catalog`]: local reads/writes for the `cards` table — the authoritative
 //!   local source for card metadata.
+//! - [`settings`]: non-secret preferences (SQLite) and secret credentials (OS keychain).
 //! - [`collection`]: CRUD over the user's owned cards.
 //! - [`pricing`]: local price cache + lookup.
 //! - [`scanning`]: image-to-card pipeline.
@@ -20,6 +21,7 @@ pub mod core;
 pub mod games;
 pub mod pricing;
 pub mod scanning;
+pub mod settings;
 pub mod storage;
 
 use commands::AppState;
@@ -45,11 +47,16 @@ pub fn run() {
             commands::fetch_card,
             commands::catalog_get,
             commands::catalog_search,
+            commands::catalog_import_start,
+            commands::catalog_import_cancel,
+            commands::catalog_import_status,
             commands::collection_list,
             commands::collection_add,
             commands::collection_remove,
             commands::pricing_get_cached,
             commands::scan_identify,
+            commands::settings_get_ptcgapi_key,
+            commands::settings_set_ptcgapi_key,
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");
