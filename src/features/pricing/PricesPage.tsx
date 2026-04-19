@@ -1,28 +1,27 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 import { useState } from "react";
 import type { ReactElement } from "react";
+import { CardSearch } from "../../components/CardSearch";
 import { api } from "../../lib/tauri";
 import type { Card, Game, Price } from "../../types";
 import { GAME_DISPLAY_NAME, isBinderbaseError } from "../../types";
 
 export function PricesPage(): ReactElement {
   const [game, setGame] = useState<Game>("mtg");
-  const [cardId, setCardId] = useState("");
   const [card, setCard] = useState<Card | null>(null);
   const [prices, setPrices] = useState<Price[]>([]);
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
 
-  async function lookup() {
-    if (!cardId.trim()) return;
+  async function handleSelect(selected: Card) {
     setError(null);
     setCard(null);
     setPrices([]);
     setLoading(true);
     try {
       const [c, p] = await Promise.all([
-        api.fetchCard(game, cardId.trim()),
-        api.pricing.getCached(game, cardId.trim()),
+        api.fetchCard(selected.game, selected.id),
+        api.pricing.getCached(selected.game, selected.id),
       ]);
       setCard(c);
       setPrices(p);
@@ -50,25 +49,8 @@ export function PricesPage(): ReactElement {
       </div>
 
       <div className="form-row">
-        <label htmlFor="card-id-input">Card id</label>
-        <input
-          id="card-id-input"
-          value={cardId}
-          onChange={(e) => setCardId(e.target.value)}
-          placeholder={
-            game === "mtg"
-              ? "Scryfall UUID, e.g. 0000579f-7b35-4ed3-b44c-db2a538066fe"
-              : "PTCGAPI id, e.g. swsh4-25"
-          }
-        />
-        <button
-          data-variant="primary"
-          type="button"
-          onClick={lookup}
-          disabled={loading || !cardId.trim()}
-        >
-          Look up
-        </button>
+        <label htmlFor="price-search">Card name</label>
+        <CardSearch game={game} onSelect={handleSelect} id="price-search" />
       </div>
 
       {loading && <p role="status">Looking up…</p>}
