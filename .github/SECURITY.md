@@ -68,9 +68,37 @@ We will not pursue legal action against researchers who:
 
 ## Branch protection
 
-The `main` branch is protected by a GitHub ruleset. The intended policy is
-documented in [`.github/branch-protection.yml`](branch-protection.yml). The
-repo admin applies the ruleset via the GitHub UI.
+The `main` branch is protected by a GitHub ruleset. The intended
+policy is documented in
+[`.github/branch-protection.yml`](branch-protection.yml). The repo
+admin applies the ruleset via the GitHub UI.
+
+### Solo-maintainer tradeoffs
+
+Binderbase is currently single-maintainer, which forces two
+Branch-Protection concessions:
+
+1. **Required approving review count is `1`, not `2`.**
+   Setting the count to `2` would make merges impossible without a
+   co-maintainer or a third-party bot reviewer.
+2. **Admin enforcement is off** (`enforce_admins: false`).
+   The repo admin must be able to bypass the approval requirement to
+   merge their own PRs. With admin enforcement on, no one can approve.
+
+Both cost ~1 point each on the OpenSSF Scorecard Branch-Protection
+check. The tradeoffs are accepted; if a second maintainer is added in
+the future, both will be tightened in the same PR that adds them to
+CODEOWNERS.
+
+Other Branch-Protection settings:
+
+- Force pushes blocked.
+- Branch deletion blocked.
+- Linear history required.
+- Code-owner review required.
+- Stale reviews dismissed on new pushes.
+- Approval of the most recent reviewable push required.
+- All status checks listed in `branch-protection.yml` must pass.
 
 ## Accepted risks
 
