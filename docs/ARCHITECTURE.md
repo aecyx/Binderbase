@@ -43,18 +43,18 @@ ADR-0002.
 
 ### Backend (`src-tauri/src/`)
 
-| Module        | Responsibility                                                               |
-| ------------- | ---------------------------------------------------------------------------- |
-| `core/`       | Shared types (`Game`, `Card`, `CardCondition`, IDs) and the `Error` enum.    |
-| `games/`      | Per-game adapters. `mtg.rs` talks to Scryfall, `pokemon.rs` to PTCGAPI.      |
-| `storage/`    | SQLite connection, schema, and migrations (`schema_vN.sql`).                 |
-| `catalog/`    | Local reads/writes for the `cards` table + bulk import (`bulk/`).            |
-| `settings/`   | Non-secret prefs (SQLite) and secret credentials (OS keychain).              |
-| `collection/` | CRUD over `collection_entries`.                                              |
-| `pricing/`    | Cached price reads and upserts.                                              |
-| `scanning/`   | Image decode + (future) card identification pipeline.                        |
+| Module        | Responsibility                                                                          |
+| ------------- | --------------------------------------------------------------------------------------- |
+| `core/`       | Shared types (`Game`, `Card`, `CardCondition`, IDs) and the `Error` enum.               |
+| `games/`      | Per-game adapters. `mtg.rs` talks to Scryfall, `pokemon.rs` to PTCGAPI.                 |
+| `storage/`    | SQLite connection, schema, and migrations (`schema_vN.sql`).                            |
+| `catalog/`    | Local reads/writes for the `cards` table + bulk import (`bulk/`).                       |
+| `settings/`   | Non-secret prefs (SQLite) and secret credentials (OS keychain).                         |
+| `collection/` | CRUD over `collection_entries`.                                                         |
+| `pricing/`    | Cached price reads and upserts.                                                         |
+| `scanning/`   | Image decode + (future) card identification pipeline.                                   |
 | `commands/`   | Tauri command surface. Split by domain: `catalog`, `collection`, `pricing`, `settings`. |
-| `lib.rs`      | Wires modules, initializes state, registers commands.                        |
+| `lib.rs`      | Wires modules, initializes state, registers commands.                                   |
 
 ### Frontend (`src/`)
 
