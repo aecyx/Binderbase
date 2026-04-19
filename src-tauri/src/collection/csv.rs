@@ -177,7 +177,7 @@ pub fn export(conn: &Connection, game: Option<Game>) -> Result<String> {
 fn map_export_row(r: &rusqlite::Row) -> rusqlite::Result<ExportRow> {
     Ok(ExportRow {
         game: r.get(0)?,
-        card_id: r.get(1)?,
+        card_id: csv_safe(&r.get::<_, String>(1)?).into_owned(),
         name: csv_safe(&r.get::<_, String>(2)?).into_owned(),
         set_code: csv_safe(&r.get::<_, String>(3)?).into_owned(),
         set_name: csv_safe(&r.get::<_, String>(4)?).into_owned(),
@@ -186,7 +186,7 @@ fn map_export_row(r: &rusqlite::Row) -> rusqlite::Result<ExportRow> {
         foil: r.get::<_, i64>(7)? != 0,
         quantity: r.get::<_, i64>(8)? as u32,
         notes: csv_safe(&r.get::<_, Option<String>>(9)?.unwrap_or_default()).into_owned(),
-        acquired_at: r.get::<_, Option<String>>(10)?.unwrap_or_default(),
+        acquired_at: csv_safe(&r.get::<_, Option<String>>(10)?.unwrap_or_default()).into_owned(),
         acquired_price_cents: r
             .get::<_, Option<i64>>(11)?
             .map(|v| v.to_string())

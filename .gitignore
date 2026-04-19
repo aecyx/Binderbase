@@ -10,6 +10,7 @@ coverage/
 # ---------- Rust / Tauri ----------
 # Build artifacts (Cargo)
 src-tauri/target/
+src-tauri/fuzz/target/
 # Tauri-generated bundle / platform code that regenerates
 src-tauri/gen/schemas/
 # Platform-specific scaffolds that pull in secrets/keystores
