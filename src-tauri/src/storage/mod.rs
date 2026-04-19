@@ -63,39 +63,60 @@ impl Database {
     }
 }
 
-mod migrations {
-    use super::{Result, SCHEMA_VERSION};
-    use rusqlite::Connection;
+mod migrations;
 
-    pub fn run(conn: &Connection) -> Result<()> {
-        conn.execute_batch(
-            "CREATE TABLE IF NOT EXISTS schema_version (
-                version INTEGER PRIMARY KEY,
-                applied_at TEXT NOT NULL
-            );",
-        )?;
-        let current: Option<u32> = conn
-            .query_row("SELECT MAX(version) FROM schema_version", [], |r| {
-                r.get::<_, Option<u32>>(0)
-            })
-            .unwrap_or(None);
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use tempfile::TempDir;
 
-        let current = current.unwrap_or(0);
-        if current < 1 {
-            apply_v1(conn)?;
-        }
-        // Future: if current < 2 { apply_v2(conn)?; }
+    #[test]
+    fn database_connect_creates_file_and_migrates() {
+        let dir = TempDir::new().unwrap();
+        let db = Database::at(dir.path().join("test.sqlite3"));
+        let conn = db.connect().unwrap();
 
-        assert!(current <= SCHEMA_VERSION, "schema newer than code");
-        Ok(())
+        let version: u32 = conn
+            .query_row("SELECT MAX(version) FROM schema_version", [], |r| r.get(0))
+            .unwrap();
+        assert_eq!(version, SCHEMA_VERSION);
     }
 
-    fn apply_v1(conn: &Connection) -> Result<()> {
-        conn.execute_batch(include_str!("schema_v1.sql"))?;
-        conn.execute(
-            "INSERT INTO schema_version (version, applied_at) VALUES (1, datetime('now'))",
-            [],
-        )?;
-        Ok(())
+    #[test]
+    fn connect_is_idempotent() {
+        let dir = TempDir::new().unwrap();
+        let db = Database::at(dir.path().join("test.sqlite3"));
+        db.connect().unwrap();
+        // Second connect on the same file should not fail.
+        let conn = db.connect().unwrap();
+
+        let version: u32 = conn
+            .query_row("SELECT MAX(version) FROM schema_version", [], |r| r.get(0))
+            .unwrap();
+        assert_eq!(version, SCHEMA_VERSION);
+    }
+
+    #[test]
+    fn foreign_keys_enabled() {
+        let dir = TempDir::new().unwrap();
+        let db = Database::at(dir.path().join("test.sqlite3"));
+        let conn = db.connect().unwrap();
+
+        let fk: i64 = conn
+            .pragma_query_value(None, "foreign_keys", |r| r.get(0))
+            .unwrap();
+        assert_eq!(fk, 1);
+    }
+
+    #[test]
+    fn wal_mode_enabled() {
+        let dir = TempDir::new().unwrap();
+        let db = Database::at(dir.path().join("test.sqlite3"));
+        let conn = db.connect().unwrap();
+
+        let mode: String = conn
+            .pragma_query_value(None, "journal_mode", |r| r.get(0))
+            .unwrap();
+        assert_eq!(mode, "wal");
     }
 }
