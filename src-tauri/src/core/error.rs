@@ -30,6 +30,13 @@ pub enum Error {
     #[error("image decode failed: {0}")]
     ImageDecode(String),
 
+    #[error("input too large: {message} (limit {limit}, actual {actual})")]
+    InputTooLarge {
+        message: String,
+        limit: String,
+        actual: String,
+    },
+
     #[error("internal error: {0}")]
     Internal(String),
 }
@@ -47,6 +54,7 @@ impl Serialize for Error {
             Error::UnsupportedGame(_) => "unsupported_game",
             Error::InvalidInput(_) => "invalid_input",
             Error::ImageDecode(_) => "image_decode",
+            Error::InputTooLarge { .. } => "input_too_large",
             Error::Internal(_) => "internal",
         };
         let mut st = s.serialize_struct("Error", 2)?;

