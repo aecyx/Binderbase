@@ -4,7 +4,7 @@
 > questionnaire. A maintainer can transfer answers directly into the web form.
 >
 > **Sourced from:** [bestpractices.dev passing criteria](https://www.bestpractices.dev/en/criteria/0)
-> (66 criteria, scraped 2025-07-17).
+> (67 criteria, scraped 2025-07-17).
 >
 > **Status key:** Met | Unmet | N/A
 
@@ -136,8 +136,8 @@ detailed build instructions.
 the graphical user interface itself. [README.md](../../README.md) describes the
 feature set (scanning, collection management, pricing). No programmatic API is
 exposed to end users.
-**Note for Matt:** If the questionnaire expects formal user-guide documentation
-beyond the README, change to Unmet and note that a user guide is planned.
+If the questionnaire expects formal user-guide documentation beyond the README,
+change status to Unmet and note that a user guide is planned.
 
 ---
 
