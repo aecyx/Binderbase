@@ -94,7 +94,7 @@ jobs:
       - name: Generate SHA256 checksums
         run: |
           cd assets
-          sha256sum * > SHA256SUMS.txt
+          sha256sum ./* > SHA256SUMS.txt
           cat SHA256SUMS.txt
 
       - name: Upload checksums

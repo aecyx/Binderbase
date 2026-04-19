@@ -50,6 +50,12 @@ jobs:
           # dashboard at https://scorecard.dev. Safe for a public repo; flip
           # to false if we ever relist as private.
           publish_results: true
+          # Prefer a fine-grained PAT limited to this repository with only
+          # the minimum read permissions Scorecard needs (for example,
+          # metadata/contents read) to query branch-protection and review
+          # signals. Falls back to the default GITHUB_TOKEN if no PAT is
+          # configured.
+          repo_token: ${{ secrets.SCORECARD_READ_TOKEN || secrets.GITHUB_TOKEN }}
 
       - name: Upload SARIF artifact (audit trail)
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
