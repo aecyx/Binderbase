@@ -1,0 +1,117 @@
+# OSV-Scanner advisory ignore list for Binderbase
+# See docs/security/advisory-triage.md for the full triage table.
+# Expiry: 2027-04-19 (1-year review window)
+
+# ── GTK3 stack (10 crates) ───────────────────────────────────────────
+# Tauri 2.x depends on gtk-rs 0.18 (GTK3 bindings), which are archived.
+# Upstream: https://github.com/tauri-apps/tauri/pull/14684
+
+[[IgnoredVulns]]
+id = "RUSTSEC-2024-0411"
+ignoreUntil = 2027-04-19
+reason = "unmaintained: gdkwayland-sys — Tauri 2.x requires gtk-rs 0.18; GTK4 migration is Tauri 3.0"
+
+[[IgnoredVulns]]
+id = "RUSTSEC-2024-0412"
+ignoreUntil = 2027-04-19
+reason = "unmaintained: gdk — Tauri 2.x requires gtk-rs 0.18; GTK4 migration is Tauri 3.0"
+
+[[IgnoredVulns]]
+id = "RUSTSEC-2024-0413"
+ignoreUntil = 2027-04-19
+reason = "unmaintained: atk — Tauri 2.x requires gtk-rs 0.18; GTK4 migration is Tauri 3.0"
+
+[[IgnoredVulns]]
+id = "RUSTSEC-2024-0414"
+ignoreUntil = 2027-04-19
+reason = "unmaintained: gdkx11-sys — Tauri 2.x requires gtk-rs 0.18; GTK4 migration is Tauri 3.0"
+
+[[IgnoredVulns]]
+id = "RUSTSEC-2024-0415"
+ignoreUntil = 2027-04-19
+reason = "unmaintained: gtk — Tauri 2.x requires gtk-rs 0.18; GTK4 migration is Tauri 3.0"
+
+[[IgnoredVulns]]
+id = "RUSTSEC-2024-0416"
+ignoreUntil = 2027-04-19
+reason = "unmaintained: atk-sys — Tauri 2.x requires gtk-rs 0.18; GTK4 migration is Tauri 3.0"
+
+[[IgnoredVulns]]
+id = "RUSTSEC-2024-0417"
+ignoreUntil = 2027-04-19
+reason = "unmaintained: gdkx11 — Tauri 2.x requires gtk-rs 0.18; GTK4 migration is Tauri 3.0"
+
+[[IgnoredVulns]]
+id = "RUSTSEC-2024-0418"
+ignoreUntil = 2027-04-19
+reason = "unmaintained: gdk-sys — Tauri 2.x requires gtk-rs 0.18; GTK4 migration is Tauri 3.0"
+
+[[IgnoredVulns]]
+id = "RUSTSEC-2024-0419"
+ignoreUntil = 2027-04-19
+reason = "unmaintained: gtk3-macros — Tauri 2.x requires gtk-rs 0.18; GTK4 migration is Tauri 3.0"
+
+[[IgnoredVulns]]
+id = "RUSTSEC-2024-0420"
+ignoreUntil = 2027-04-19
+reason = "unmaintained: gtk-sys — Tauri 2.x requires gtk-rs 0.18; GTK4 migration is Tauri 3.0"
+
+# ── glib unsound (GTK3 stack) ────────────────────────────────────────
+# Fixed in glib >=0.20.0; Tauri 2.x pins glib 0.18 via gtk-rs 0.18
+# Upstream: https://github.com/gtk-rs/gtk-rs-core/pull/1343
+
+[[IgnoredVulns]]
+id = "RUSTSEC-2024-0429"
+ignoreUntil = 2027-04-19
+reason = "unsound: glib VariantStrIter — fixed in >=0.20.0 but Tauri 2.x pins glib 0.18"
+
+# ── proc-macro-error (GTK3 stack) ────────────────────────────────────
+# Used by glib-macros/gtk3-macros; drops with GTK4 migration
+# Upstream: https://github.com/tauri-apps/tauri/pull/14684
+
+[[IgnoredVulns]]
+id = "RUSTSEC-2024-0370"
+ignoreUntil = 2027-04-19
+reason = "unmaintained: proc-macro-error — used by gtk3-macros; drops with GTK4 migration in Tauri 3.0"
+
+# ── kuchikiki chain (2 crates) ───────────────────────────────────────
+# Pulled via selectors→kuchikiki→tauri-utils
+
+[[IgnoredVulns]]
+id = "RUSTSEC-2025-0057"
+ignoreUntil = 2027-04-19
+reason = "unmaintained: fxhash — pulled via selectors→kuchikiki→tauri-utils; no newer version exists"
+
+[[IgnoredVulns]]
+id = "RUSTSEC-2026-0097"
+ignoreUntil = 2027-04-19
+reason = "unsound: rand 0.7 — pulled via phf_codegen→selectors→kuchikiki→tauri-utils; patched in >=0.8.6"
+
+# ── unic chain (5 crates) ────────────────────────────────────────────
+# tauri-utils pins urlpattern 0.3.0 which depends on unic-*
+# Upstream: urlpattern 0.6 drops unic-* but is semver-incompatible with 0.3
+
+[[IgnoredVulns]]
+id = "RUSTSEC-2025-0075"
+ignoreUntil = 2027-04-19
+reason = "unmaintained: unic-char-range — tauri-utils pins urlpattern 0.3 which requires unic-*"
+
+[[IgnoredVulns]]
+id = "RUSTSEC-2025-0080"
+ignoreUntil = 2027-04-19
+reason = "unmaintained: unic-common — tauri-utils pins urlpattern 0.3 which requires unic-*"
+
+[[IgnoredVulns]]
+id = "RUSTSEC-2025-0081"
+ignoreUntil = 2027-04-19
+reason = "unmaintained: unic-char-property — tauri-utils pins urlpattern 0.3 which requires unic-*"
+
+[[IgnoredVulns]]
+id = "RUSTSEC-2025-0098"
+ignoreUntil = 2027-04-19
+reason = "unmaintained: unic-ucd-version — tauri-utils pins urlpattern 0.3 which requires unic-*"
+
+[[IgnoredVulns]]
+id = "RUSTSEC-2025-0100"
+ignoreUntil = 2027-04-19
+reason = "unmaintained: unic-ucd-ident — tauri-utils pins urlpattern 0.3 which requires unic-*"

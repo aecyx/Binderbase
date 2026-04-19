@@ -81,8 +81,9 @@ The following are known, documented trade-offs accepted for the 1.0 release:
   signatures and SHA256 checksums attached to each release.
 - **Transitive unmaintained/unsound dependencies (19 advisories).** All 19
   are upstream-blocked in the Tauri 2.x dependency tree. None are active
-  exploitable vulnerabilities — all are `unmaintained` or `unsound` advisories
-  in code paths we don't exercise directly. Specific groups:
+  exploitable vulnerabilities (0 CVEs, 0 CVSS scores) — all are `unmaintained`
+  or `unsound` INFO-level advisories in code paths we don't exercise directly.
+  Specific groups:
   - **GTK3 stack (12 crates):** gtk-rs 0.18 bindings + glib unsound + proc-macro-error.
     Blocked on [tauri-apps/tauri#14684](https://github.com/tauri-apps/tauri/pull/14684)
     (GTK4 migration, targeted at Tauri 3.0) and
@@ -92,8 +93,12 @@ The following are known, documented trade-offs accepted for the 1.0 release:
     replacing its HTML parser.
   - **unic-\* (5 crates):** Pulled via tauri-utils → urlpattern 0.3.0.
     urlpattern 0.6.0 exists upstream but tauri-utils 2.x pins 0.3.0.
-    Tracked in `src-tauri/deny.toml` with per-advisory upstream issue links.
-    Next review: 2026-10-19.
+
+  Full per-advisory triage in [`docs/security/advisory-triage.md`](../../docs/security/advisory-triage.md).
+  Suppressed in `osv-scanner.toml` with a 1-year ignoreUntil (2027-04-19).
+  Also tracked in `src-tauri/deny.toml` with per-advisory upstream issue links.
+  OSV-Scanner CI runs weekly + on push/PR to detect new advisories.
+
 - **MTG bulk import peak RSS ~1 GB.** The Scryfall bulk JSON (~200 MB) is
   loaded into memory. Documented in README system requirements.
 

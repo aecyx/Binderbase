@@ -28,6 +28,12 @@ This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
   Updated `deny.toml` with per-advisory upstream issue links and specific
   comments. Two new advisories added to ignore list: RUSTSEC-2024-0429
   (glib unsound) and RUSTSEC-2026-0097 (rand 0.7 unsound).
+- Per-advisory triage table in `docs/security/advisory-triage.md` documenting
+  all 19 RUSTSEC advisories with type, CVE, CVSS, upstream blocker, and reason.
+- `osv-scanner.toml` with time-bounded ignores (expiry 2027-04-19) for all 19
+  non-vulnerability INFO advisories.
+- OSV-Scanner CI workflow (weekly + push/PR) uploading SARIF to GitHub Code
+  Scanning, SHA-pinned to google/osv-scanner-action v2.3.5.
 
 ## [1.0.0-rc.1] — 2026-04-19
 
