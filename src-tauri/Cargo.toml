@@ -59,6 +59,9 @@ uuid = { version = "1", features = ["v4", "serde"] }
 # can be mocked in tests).
 async-trait = "0.1"
 
+# CSV parsing and writing (collection import/export).
+csv = "1"
+
 # OS-native credential store for the Pokémon TCG API key. We use platform
 # backends — no secret-service dependency leaks onto Windows or macOS — and
 # tests swap in an in-memory store via the SecretStore trait.

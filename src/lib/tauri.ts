@@ -14,6 +14,8 @@ import type {
   AppInfo,
   Card,
   CollectionEntry,
+  CsvImportPreview,
+  CsvImportResult,
   Game,
   ImportProgress,
   ImportStatus,
@@ -58,6 +60,11 @@ export const api = {
     list: (game?: Game) => invoke<CollectionEntry[]>("collection_list", { game: game ?? null }),
     add: (entry: NewEntry) => invoke<CollectionEntry>("collection_add", { entry }),
     remove: (entryId: string) => invoke<void>("collection_remove", { entryId }),
+    exportCsv: (game?: Game) => invoke<string>("collection_export_csv", { game: game ?? null }),
+    importPreview: (csvText: string) =>
+      invoke<CsvImportPreview>("collection_import_preview", { csvText }),
+    importApply: (csvText: string) =>
+      invoke<CsvImportResult>("collection_import_apply", { csvText }),
   },
 
   pricing: {

@@ -4,6 +4,8 @@
 //! Every method takes a `&Connection` so callers can batch operations into a
 //! transaction when they need atomicity. Nothing here talks to the network.
 
+pub mod csv;
+
 use crate::core::{CardCondition, CardId, Error, Game, Result};
 use rusqlite::{params, Connection};
 use serde::{Deserialize, Serialize};

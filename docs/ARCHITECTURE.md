@@ -106,6 +106,9 @@ Currently:
 | `collection_list(game?)`             | List collection, optionally filtered.                   |
 | `collection_add(entry)`              | Insert a collection entry.                              |
 | `collection_remove(entry_id)`        | Delete by entry id.                                     |
+| `collection_export_csv(game?)`       | Export collection as CSV (joined with card metadata).   |
+| `collection_import_preview(csv)`     | Dry-run CSV import — parse, validate, preview.          |
+| `collection_import_apply(csv)`       | Apply a validated CSV import.                           |
 | `pricing_get_cached(game, id)`       | Read cached prices.                                     |
 | `scan_identify(bytes, hint?)`        | Decode an image and return candidate matches (stubbed). |
 | `settings_get_ptcgapi_key`           | Read the stored Pokémon TCG API key.                    |

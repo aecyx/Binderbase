@@ -163,3 +163,32 @@ export interface IndexStatus {
   pokemon_hashed: number;
   pokemon_total: number;
 }
+
+// ---------- Collection CSV import/export ----------
+
+export interface CsvRowError {
+  line: number;
+  message: string;
+}
+
+export interface CsvPreviewEntry {
+  game: Game;
+  card_id: string;
+  name: string;
+  condition: string;
+  foil: boolean;
+  quantity: number;
+}
+
+export interface CsvImportPreview {
+  total_rows: number;
+  valid_rows: number;
+  errors: CsvRowError[];
+  sample: CsvPreviewEntry[];
+}
+
+export interface CsvImportResult {
+  imported: number;
+  skipped: number;
+  errors: CsvRowError[];
+}

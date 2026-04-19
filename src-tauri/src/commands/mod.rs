@@ -16,7 +16,10 @@ pub use catalog::{
     catalog_get, catalog_import_cancel, catalog_import_start, catalog_import_status,
     catalog_search, fetch_card,
 };
-pub use collection::{collection_add, collection_list, collection_remove};
+pub use collection::{
+    collection_add, collection_export_csv, collection_import_apply, collection_import_preview,
+    collection_list, collection_remove,
+};
 pub use scanning::{scan_build_index, scan_build_index_cancel, scan_identify, scan_index_status};
 pub use settings::{settings_get_ptcgapi_key, settings_set_ptcgapi_key};
 
