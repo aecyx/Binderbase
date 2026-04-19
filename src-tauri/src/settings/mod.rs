@@ -139,8 +139,7 @@ impl SecretStore for KeyringSecrets {
 }
 
 /// Test-only secret store. Also useful as a fallback if the OS keychain is
-/// unavailable (headless Linux CI, sandboxed installs); right now we only
-/// wire it up in tests, but exposing it publicly keeps that door open.
+/// unavailable (headless Linux CI, sandboxed installs).
 pub struct InMemorySecrets {
     inner: std::sync::Mutex<std::collections::HashMap<String, String>>,
 }

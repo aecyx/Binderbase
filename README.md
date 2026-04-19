@@ -6,8 +6,6 @@
 
 A local-first trading-card-game scanner and collection manager.
 
-<!-- TODO: add screenshot -->
-
 ## What it does
 
 Binderbase identifies cards from scans or manual lookups, tracks your
@@ -33,9 +31,8 @@ refresh from public sources (Scryfall, Pokémon TCG API) and are cached locally.
 
 ## Status
 
-Pre-1.0. The scaffold is in place (Tauri shell, React frontend, Rust backend,
-SQLite storage) but there is no downloadable release yet. Expect breaking
-changes.
+Release candidate. Download the latest build from
+[Releases](https://github.com/aecyx/Binderbase/releases).
 
 ## Quick start
 
@@ -49,6 +46,51 @@ npm run tauri dev
 Requires Node.js 22+, Rust (via rustup), and the
 [Tauri prerequisites](https://tauri.app/start/prerequisites/) for your OS. See
 [`CONTRIBUTING.md`](CONTRIBUTING.md) for the full development setup.
+
+## System requirements
+
+- **OS:** Windows 10+, macOS 12+, or a Linux desktop with WebKitGTK 4.1
+- **RAM:** 4 GB minimum. The MTG catalog import temporarily holds ~200 MB of
+  card data in memory; peak RSS may reach ~1 GB during import.
+- **Disk:** ~2 GB free if you build the full scan index (thumbnail downloads
+  for ~42 k cards across both games).
+- **Network:** Catalog import and scan-index builds make many HTTP requests to
+  Scryfall / Pokémon TCG API. A stable connection is recommended; there is no
+  resume — if the connection drops, you'll need to restart the operation.
+
+## Installing unsigned binaries
+
+Binderbase is not currently code-signed. On first launch your OS may show a
+warning:
+
+- **Windows SmartScreen:** Click _More info → Run anyway_.
+- **macOS Gatekeeper:** Right-click the app → _Open_ → confirm.
+- **Linux:** No extra step needed for AppImage/deb packages.
+
+You can verify the download using the `SHA256SUMS.txt` file attached to each
+[release](https://github.com/aecyx/Binderbase/releases).
+
+## Scanning limitations
+
+The card scanner currently works best with **cleanly cropped card images**
+(single card filling most of the frame). Full phone-photo support with
+automatic card detection, perspective correction, and deskew is planned for a
+future release.
+
+## Data sources
+
+- **Magic: The Gathering** card data from [Scryfall](https://scryfall.com).
+  Binderbase is not produced by or endorsed by Scryfall.
+- **Pokémon TCG** card data from the
+  [Pokémon TCG API](https://pokemontcg.io). Binderbase is not produced by or
+  endorsed by Pokémon TCG API.
+
+## Privacy
+
+Binderbase does **not** collect or transmit any user data. There is no
+telemetry, analytics, or crash reporting. The only network calls are to the
+Scryfall and Pokémon TCG API servers to fetch card data and prices. All
+collection data stays on your machine.
 
 ## Mobile
 

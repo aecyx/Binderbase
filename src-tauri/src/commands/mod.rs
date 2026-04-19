@@ -30,7 +30,7 @@ use crate::core::{Error, Game, Result};
 use crate::games;
 use crate::pricing::Price;
 use crate::scanning::index::IndexController;
-use crate::settings::{KeyringSecrets, SecretStore};
+use crate::settings::{InMemorySecrets, KeyringSecrets, SecretStore};
 use crate::storage::Database;
 use serde::Serialize;
 use std::sync::{Arc, Mutex};
@@ -46,18 +46,37 @@ pub struct AppState {
     pub import_controller: Arc<ImportController>,
     pub index_controller: Arc<IndexController>,
     pub secrets: Arc<dyn SecretStore>,
+    /// `true` when the OS keyring was unavailable and secrets fall back to
+    /// in-memory storage (won't persist across launches).
+    pub keyring_degraded: bool,
 }
 
 impl AppState {
     pub fn init() -> Result<Self> {
         let db = Database::in_user_data_dir()?;
         let conn = db.connect()?;
+
+        // Try the real OS keyring first; fall back to in-memory if it fails.
+        let (secrets, keyring_degraded): (Arc<dyn SecretStore>, bool) = {
+            let ks = KeyringSecrets::new();
+            match ks.get("__probe__") {
+                Ok(_) => (Arc::new(ks), false),
+                Err(_) => {
+                    tracing::warn!(
+                        "OS keyring unavailable — secrets will not persist across launches"
+                    );
+                    (Arc::new(InMemorySecrets::new()), true)
+                }
+            }
+        };
+
         Ok(Self {
             db,
             conn: Mutex::new(conn),
             import_controller: Arc::new(ImportController::new()),
             index_controller: Arc::new(IndexController::new()),
-            secrets: Arc::new(KeyringSecrets::new()),
+            secrets,
+            keyring_degraded,
         })
     }
 
@@ -80,6 +99,7 @@ pub struct AppInfo {
     pub version: &'static str,
     pub db_path: String,
     pub supported_games: Vec<games::GameDescriptor>,
+    pub keyring_degraded: bool,
 }
 
 #[tauri::command]
@@ -89,6 +109,7 @@ pub fn app_info(state: State<'_, AppState>) -> AppInfo {
         version: env!("CARGO_PKG_VERSION"),
         db_path: state.db.path().to_string_lossy().into_owned(),
         supported_games: Game::all().iter().copied().map(games::describe).collect(),
+        keyring_degraded: state.keyring_degraded,
     }
 }
 

@@ -338,3 +338,76 @@ hr {
   border-top: 1px solid var(--border);
   margin: var(--space-4) 0;
 }
+
+/* ---------- About modal ---------- */
+
+.about-trigger {
+  background: transparent;
+  border: none;
+  color: var(--fg-muted);
+  padding: 0;
+  font-size: inherit;
+  text-decoration: underline;
+  cursor: pointer;
+}
+
+.about-trigger:hover {
+  color: var(--accent);
+  border-color: transparent;
+}
+
+.about-dialog {
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  background: var(--bg-elevated);
+  color: var(--fg);
+  padding: var(--space-6);
+  max-width: 480px;
+  width: 90vw;
+}
+
+.about-dialog::backdrop {
+  background: rgb(0 0 0 / 0.5);
+}
+
+.about-dialog h2 {
+  margin-top: 0;
+}
+
+.about-dialog h3 {
+  margin-bottom: var(--space-2);
+}
+
+.about-credits {
+  padding-left: var(--space-4);
+}
+
+.about-credits li {
+  margin-bottom: var(--space-2);
+}
+
+.about-dialog__footer {
+  margin-top: var(--space-4);
+  display: flex;
+  justify-content: flex-end;
+}
+
+/* ---------- Onboarding banner ---------- */
+
+.onboarding-banner {
+  background: var(--bg-elevated);
+  border: 2px solid var(--accent);
+  border-radius: var(--radius-lg);
+  padding: var(--space-4) var(--space-6);
+  margin-bottom: var(--space-6);
+  text-align: center;
+}
+
+.onboarding-banner h2 {
+  margin-top: 0;
+  color: var(--accent);
+}
+
+.onboarding-banner button {
+  margin-top: var(--space-3);
+}

@@ -6,7 +6,9 @@ All notable changes to Binderbase are documented in this file.
 Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [1.0.0] — 2026-04-19
+## [Unreleased]
+
+## [1.0.0-rc.1] — 2026-04-19
 
 ### Added
 
@@ -40,4 +42,5 @@ This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
   Linux/macOS/Windows, dependency audit.
 - AGPL-3.0-or-later license with SPDX headers on all source files.
 
-[1.0.0]: https://github.com/aecyx/Binderbase/releases/tag/v1.0.0
+[Unreleased]: https://github.com/aecyx/Binderbase/compare/v1.0.0-rc.1...HEAD
+[1.0.0-rc.1]: https://github.com/aecyx/Binderbase/releases/tag/v1.0.0-rc.1

@@ -92,6 +92,7 @@ export interface AppInfo {
   version: string;
   db_path: string;
   supported_games: GameDescriptor[];
+  keyring_degraded: boolean;
 }
 
 /** Discriminated error shape returned by Tauri commands. */

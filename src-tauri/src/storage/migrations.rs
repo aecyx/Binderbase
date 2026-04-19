@@ -37,6 +37,19 @@ pub fn run(conn: &Connection) -> Result<()> {
         )));
     }
 
+    // Back up the database file before applying any migration so users can
+    // recover if something goes wrong.
+    if current > 0 && current < SCHEMA_VERSION {
+        if let Some(db_path) = conn.path() {
+            let backup_name = format!("{db_path}.pre-migration-v{current}.bak");
+            if let Err(e) = std::fs::copy(db_path, &backup_name) {
+                tracing::warn!("could not create pre-migration backup: {e}");
+            } else {
+                tracing::info!("created pre-migration backup: {backup_name}");
+            }
+        }
+    }
+
     if current < 1 {
         apply_v1(conn)?;
     }

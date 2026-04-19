@@ -2,7 +2,7 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import type { ReactElement } from "react";
 import { api } from "../../lib/tauri";
-import type { CardCondition, Game, ScanMatch, ScanResult } from "../../types";
+import type { CardCondition, Game, IndexStatus, ScanMatch, ScanResult } from "../../types";
 import { GAME_DISPLAY_NAME, isBinderbaseError } from "../../types";
 
 const CONDITIONS: { value: CardCondition; label: string }[] = [
@@ -89,6 +89,17 @@ export function ScanPage(): ReactElement {
   const [result, setResult] = useState<ScanResult | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
+  const [indexStatus, setIndexStatus] = useState<IndexStatus | null>(null);
+
+  // Check scan index status on mount so we can warn if it's empty.
+  useEffect(() => {
+    api.scanning
+      .indexStatus()
+      .then(setIndexStatus)
+      .catch(() => {
+        // Non-fatal.
+      });
+  }, []);
 
   // -- webcam --
   const [camActive, setCamActive] = useState(false);
@@ -161,6 +172,15 @@ export function ScanPage(): ReactElement {
   return (
     <section aria-labelledby="scan-heading">
       <h1 id="scan-heading">Scan a card</h1>
+
+      {indexStatus && indexStatus.mtg_hashed === 0 && indexStatus.pokemon_hashed === 0 && (
+        <div className="notice" role="status">
+          <strong>Scan index not built yet.</strong> Go to{" "}
+          <strong>Import / Export → Scan Index</strong> and build the index for at least one game
+          before scanning.
+        </div>
+      )}
+
       <p className="muted">Use your webcam or load an image from your drive.</p>
 
       <div className="form-row">

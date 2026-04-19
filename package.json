@@ -1,7 +1,7 @@
 {
   "name": "binderbase",
   "private": true,
-  "version": "0.1.0",
+  "version": "1.0.0-rc.1",
   "description": "Local-first trading-card-game scanner and collection manager (MTG, Pokemon).",
   "type": "module",
   "license": "AGPL-3.0-or-later",

@@ -47,6 +47,7 @@ export default [
         HTMLSelectElement: "readonly",
         HTMLVideoElement: "readonly",
         HTMLCanvasElement: "readonly",
+        HTMLDialogElement: "readonly",
         MediaStream: "readonly",
         MouseEvent: "readonly",
         Node: "readonly",
