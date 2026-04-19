@@ -1,7 +1,7 @@
 # CII Best Practices — Self-Assessment Draft
 
 > **Purpose:** Pre-fill for the [OpenSSF Best Practices](https://www.bestpractices.dev/)
-> questionnaire. Matt can transfer answers directly into the web form.
+> questionnaire. A maintainer can transfer answers directly into the web form.
 >
 > **Sourced from:** [bestpractices.dev passing criteria](https://www.bestpractices.dev/en/criteria/0)
 > (66 criteria, scraped 2025-07-17).
