@@ -39,13 +39,31 @@ jobs:
           echo "${OSV_SHA256}  /usr/local/bin/osv-scanner" | sha256sum -c -
           chmod +x /usr/local/bin/osv-scanner
 
-      - name: Run osv-scanner
+      - name: Run osv-scanner (SARIF)
+        id: scan
+        continue-on-error: true
         run: |
+          set +e
           osv-scanner scan --config=./osv-scanner.toml \
-            --recursive --format sarif --output results.sarif ./ || true
+            --recursive --format sarif --output results.sarif ./
+          rc=$?
+          echo "exit_code=$rc" >> "$GITHUB_OUTPUT"
+          exit $rc
 
       - name: Upload SARIF
         if: always()
         uses: github/codeql-action/upload-sarif@95e58e9a2cdfd71adc6e0353d5c52f41a045d225 # v4.35.2
         with:
           sarif_file: results.sarif
+
+      - name: Enforce scan result
+        if: steps.scan.outcome == 'failure'
+        env:
+          SCAN_EXIT_CODE: ${{ steps.scan.outputs.exit_code }}
+        run: |
+          if [ "$SCAN_EXIT_CODE" = "1" ]; then
+            echo "::error::osv-scanner found vulnerabilities not covered by osv-scanner.toml ignores"
+          else
+            echo "::error::osv-scanner failed with unexpected exit code ${SCAN_EXIT_CODE} (check scanner configuration or CLI errors above)"
+          fi
+          exit 1
