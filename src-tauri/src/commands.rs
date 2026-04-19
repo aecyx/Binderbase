@@ -5,6 +5,7 @@
 //! map the result into the Tauri `Result` shape. Business logic belongs in
 //! the domain modules (core, games, collection, pricing, scanning).
 
+use crate::catalog;
 use crate::collection::{self, CollectionEntry, NewEntry};
 use crate::core::{Card, CardId, Error, Game, Result};
 use crate::games;
@@ -14,6 +15,12 @@ use crate::storage::Database;
 use serde::Serialize;
 use std::sync::Mutex;
 use tauri::State;
+
+/// Default page size for `catalog_search`. Matches the autocomplete UX —
+/// big enough to cover realistic matches, small enough not to stall a render.
+const DEFAULT_CATALOG_SEARCH_LIMIT: u32 = 25;
+/// Hard cap to protect the UI thread from a runaway request.
+const MAX_CATALOG_SEARCH_LIMIT: u32 = 200;
 
 /// App-wide state. We currently only carry the database handle; add more
 /// fields as the app grows (e.g., HTTP client pool, background job handles).
@@ -67,9 +74,60 @@ pub fn app_info(state: State<'_, AppState>) -> AppInfo {
 
 // ---------- catalog ----------
 
+/// Fetch a card, local-first.
+///
+/// Policy:
+/// 1. Look up `(game, id)` in the local catalog. Hit → return immediately,
+///    no network.
+/// 2. Miss → hit the live game adapter (`games::fetch_card`).
+/// 3. On a successful live fetch, upsert into the catalog so the next call
+///    is a hit. Upsert failures are logged but do not fail the command —
+///    the user still gets their card.
 #[tauri::command]
-pub async fn fetch_card(game: Game, id: String) -> Result<Card> {
-    games::fetch_card(game, &CardId(id)).await
+pub async fn fetch_card(state: State<'_, AppState>, game: Game, id: String) -> Result<Card> {
+    let card_id = CardId(id);
+
+    if let Some(cached) = state.with_conn(|c| catalog::get(c, game, &card_id))? {
+        return Ok(cached);
+    }
+
+    let card = games::fetch_card(game, &card_id).await?;
+
+    if let Err(e) = state.with_conn(|c| catalog::upsert(c, &card)) {
+        // Cache-miss-then-live-fetch worked; persisting the result didn't.
+        // Surfacing this as a command error would hide a useful response, so
+        // we just log and move on.
+        tracing::warn!(error = %e, game = ?game, card_id = %card.id.0,
+            "catalog upsert failed after live fetch; user got card but cache is cold");
+    }
+
+    Ok(card)
+}
+
+/// Read a card straight from the catalog without a network fallthrough.
+/// Returns `None` if the catalog hasn't heard of it yet.
+#[tauri::command]
+pub fn catalog_get(
+    state: State<'_, AppState>,
+    game: Game,
+    card_id: String,
+) -> Result<Option<Card>> {
+    state.with_conn(|c| catalog::get(c, game, &CardId(card_id)))
+}
+
+/// Substring-search the local catalog. Used for autocomplete in the
+/// "add to collection" flow. Clamps `limit` to `MAX_CATALOG_SEARCH_LIMIT`.
+#[tauri::command]
+pub fn catalog_search(
+    state: State<'_, AppState>,
+    game: Option<Game>,
+    query: String,
+    limit: Option<u32>,
+) -> Result<Vec<Card>> {
+    let effective_limit = limit
+        .unwrap_or(DEFAULT_CATALOG_SEARCH_LIMIT)
+        .min(MAX_CATALOG_SEARCH_LIMIT);
+    state.with_conn(|c| catalog::search(c, game, &query, effective_limit))
 }
 
 // ---------- collection ----------

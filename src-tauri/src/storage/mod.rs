@@ -65,6 +65,32 @@ impl Database {
 
 mod migrations;
 
+/// Test-only helpers shared across modules.
+///
+/// This is `pub(crate)` and gated on `#[cfg(test)]` so it ships nothing to
+/// release builds but any sibling module's `#[cfg(test)] mod tests` can reach
+/// it via `crate::storage::test_support::memory_conn()`. Keeps every suite on
+/// one migration path — if schema_v1.sql changes, every test picks it up for
+/// free.
+#[cfg(test)]
+pub(crate) mod test_support {
+    use super::migrations;
+    use rusqlite::Connection;
+
+    /// Open an in-memory SQLite connection with the production pragmas applied
+    /// and all migrations run. Panics on failure — only for use in tests.
+    pub fn memory_conn() -> Connection {
+        let conn = Connection::open_in_memory().expect("open in-memory sqlite");
+        conn.pragma_update(None, "foreign_keys", "ON")
+            .expect("enable foreign_keys");
+        // journal_mode=WAL is meaningless on :memory: — skip it to avoid noise.
+        conn.pragma_update(None, "synchronous", "NORMAL")
+            .expect("set synchronous");
+        migrations::run(&conn).expect("run migrations");
+        conn
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;

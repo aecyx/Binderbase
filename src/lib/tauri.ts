@@ -16,6 +16,26 @@ export const api = {
 
   fetchCard: (game: Game, id: string) => invoke<Card>("fetch_card", { game, id }),
 
+  catalog: {
+    /**
+     * Read a card straight from the local catalog. Returns `null` if the
+     * catalog hasn't heard of it — callers typically fall through to
+     * `fetchCard` (which is itself local-first) in that case.
+     */
+    get: (game: Game, cardId: string) => invoke<Card | null>("catalog_get", { game, cardId }),
+    /**
+     * Case-insensitive substring search against card names. Empty / whitespace
+     * queries resolve to `[]`. `limit` is clamped server-side (default 25,
+     * max 200).
+     */
+    search: (query: string, opts?: { game?: Game; limit?: number }) =>
+      invoke<Card[]>("catalog_search", {
+        game: opts?.game ?? null,
+        query,
+        limit: opts?.limit ?? null,
+      }),
+  },
+
   collection: {
     list: (game?: Game) => invoke<CollectionEntry[]>("collection_list", { game: game ?? null }),
     add: (entry: NewEntry) => invoke<CollectionEntry>("collection_add", { entry }),

@@ -6,11 +6,14 @@
 //! - [`core`]: game-agnostic domain types and the app-wide `Error`.
 //! - [`games`]: per-game catalog adapters (MTG via Scryfall, Pokémon via PTCGAPI).
 //! - [`storage`]: SQLite connection and migrations.
+//! - [`catalog`]: local reads/writes for the `cards` table — the authoritative
+//!   local source for card metadata.
 //! - [`collection`]: CRUD over the user's owned cards.
 //! - [`pricing`]: local price cache + lookup.
 //! - [`scanning`]: image-to-card pipeline.
 //! - [`commands`]: Tauri command surface exposed to the frontend.
 
+pub mod catalog;
 pub mod collection;
 pub mod commands;
 pub mod core;
@@ -40,6 +43,8 @@ pub fn run() {
         .invoke_handler(tauri::generate_handler![
             commands::app_info,
             commands::fetch_card,
+            commands::catalog_get,
+            commands::catalog_search,
             commands::collection_list,
             commands::collection_add,
             commands::collection_remove,
