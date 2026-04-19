@@ -23,7 +23,7 @@ pub mod index;
 
 use crate::catalog;
 use crate::core::{CardId, Error, Game, Result};
-use image::ImageReader;
+use image::{ImageReader, Limits};
 use rusqlite::Connection;
 use serde::{Deserialize, Serialize};
 use std::io::Cursor;
@@ -72,24 +72,39 @@ pub fn identify(bytes: &[u8], game_hint: Option<Game>, conn: &Connection) -> Res
     // Guard: reject oversized payloads before decoding.
     if bytes.len() > MAX_IMAGE_BYTES {
         return Err(Error::InputTooLarge {
-            message: "image file exceeds the 10 MB size limit".into(),
+            message: format!(
+                "image file exceeds the {} MB size limit",
+                MAX_IMAGE_BYTES / (1024 * 1024)
+            ),
             limit: format!("{MAX_IMAGE_BYTES}"),
             actual: format!("{}", bytes.len()),
         });
     }
 
-    let reader = ImageReader::new(Cursor::new(bytes))
+    let mut reader = ImageReader::new(Cursor::new(bytes))
         .with_guessed_format()
         .map_err(|e| Error::ImageDecode(e.to_string()))?;
+
+    // Set decode limits *before* calling decode() to prevent
+    // decompression bombs from allocating unbounded memory.
+    let mut limits = Limits::default();
+    // 4 bytes per pixel (RGBA) × MAX_PIXEL_COUNT
+    limits.max_alloc = Some(MAX_PIXEL_COUNT * 4);
+    reader.limits(limits);
+
     let img = reader.decode()?;
     let width = img.width();
     let height = img.height();
 
-    // Guard: reject decompression bombs.
+    // Secondary guard: reject on pixel count even if decoder
+    // allocation tracking was imprecise.
     let pixel_count = u64::from(width) * u64::from(height);
     if pixel_count > MAX_PIXEL_COUNT {
         return Err(Error::InputTooLarge {
-            message: "decoded image exceeds the 50 megapixel limit".into(),
+            message: format!(
+                "decoded image exceeds the {} megapixel limit",
+                MAX_PIXEL_COUNT / 1_000_000
+            ),
             limit: format!("{MAX_PIXEL_COUNT}"),
             actual: format!("{pixel_count}"),
         });
