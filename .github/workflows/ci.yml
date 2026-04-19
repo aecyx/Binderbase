@@ -73,18 +73,10 @@ jobs:
             wget \
             file
 
-      - name: Cache Rust dependencies
-        uses: actions/cache@5a3ec84eff668545956fd18022155c47e93e2684 # v4.2.3
+      - name: Cache Rust toolchain and dependencies
+        uses: Swatinem/rust-cache@c19371144df3bb44fab255c43d04cbc2ab54d1c4 # v2.9.1
         with:
-          path: |
-            ~/.cargo/bin/
-            ~/.cargo/registry/index/
-            ~/.cargo/registry/cache/
-            ~/.cargo/git/db/
-            src-tauri/target/
-          key: rust-lint-${{ runner.os }}-${{ hashFiles('src-tauri/Cargo.lock') }}
-          restore-keys: |
-            rust-lint-${{ runner.os }}-
+          workspaces: "src-tauri -> target"
 
       - name: cargo fmt --check
         run: cargo fmt --all -- --check
@@ -124,18 +116,10 @@ jobs:
             wget \
             file
 
-      - name: Cache Rust dependencies
-        uses: actions/cache@5a3ec84eff668545956fd18022155c47e93e2684 # v4.2.3
+      - name: Cache Rust toolchain and dependencies
+        uses: Swatinem/rust-cache@c19371144df3bb44fab255c43d04cbc2ab54d1c4 # v2.9.1
         with:
-          path: |
-            ~/.cargo/bin/
-            ~/.cargo/registry/index/
-            ~/.cargo/registry/cache/
-            ~/.cargo/git/db/
-            src-tauri/target/
-          key: rust-test-${{ runner.os }}-${{ hashFiles('src-tauri/Cargo.lock') }}
-          restore-keys: |
-            rust-test-${{ runner.os }}-
+          workspaces: "src-tauri -> target"
 
       - name: cargo test
         run: cargo test --all-features --no-fail-fast
