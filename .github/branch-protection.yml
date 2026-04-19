@@ -12,12 +12,13 @@ require_pull_request:
 require_status_checks:
   strict: true # branch must be up to date
   checks:
-    - ci / lint
-    - ci / test
-    - ci / audit
-    - codeql / analyze (javascript-typescript)
-    - codeql / analyze (actions)
-    - cargo-deny
+    - CI / Frontend (lint, typecheck, build)
+    - CI / Rust lint (fmt, clippy)
+    - CI / Rust test (ubuntu-latest)
+    - CI / Security audit
+    - CodeQL / Analyze (javascript-typescript)
+    - CodeQL / Analyze (actions)
+    - cargo-deny / cargo-deny
 require_signed_commits: false # opt-in when contributors are comfortable with gpg/ssh signing
 require_linear_history: true
 block_force_pushes: true
