@@ -92,8 +92,8 @@ The following are known, documented trade-offs accepted for the 1.0 release:
     replacing its HTML parser.
   - **unic-\* (5 crates):** Pulled via tauri-utils → urlpattern 0.3.0.
     urlpattern 0.6.0 exists upstream but tauri-utils 2.x pins 0.3.0.
-  Tracked in `src-tauri/deny.toml` with per-advisory upstream issue links.
-  Next review: 2026-10-19.
+    Tracked in `src-tauri/deny.toml` with per-advisory upstream issue links.
+    Next review: 2026-10-19.
 - **MTG bulk import peak RSS ~1 GB.** The Scryfall bulk JSON (~200 MB) is
   loaded into memory. Documented in README system requirements.
 
