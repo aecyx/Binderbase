@@ -75,3 +75,6 @@ playwright-report/
 
 # Session scratch — never commit
 .test-sync
+
+# ---------- Handoff docs (local coordination only) ----------
+docs/handoff/

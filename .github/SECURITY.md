@@ -79,11 +79,21 @@ The following are known, documented trade-offs accepted for the 1.0 release:
 - **Unsigned native binaries.** Windows and macOS binaries are not code-signed
   (no EV/Developer ID certificate). Users verify downloads via cosign keyless
   signatures and SHA256 checksums attached to each release.
-- **Transitive unmaintained dependencies.** Tauri 2's GTK3 stack on Linux and
-  the `urlpattern` dependency chain pull in unmaintained crates (gtk-rs 0.18,
-  unic-\*, proc-macro-error, fxhash). These are all `unmaintained` advisories,
-  not active vulnerabilities. Tracked in `src-tauri/deny.toml` with a 6-month
-  review cadence; will clear as Tauri migrates to gtk4-rs.
+- **Transitive unmaintained/unsound dependencies (19 advisories).** All 19
+  are upstream-blocked in the Tauri 2.x dependency tree. None are active
+  exploitable vulnerabilities — all are `unmaintained` or `unsound` advisories
+  in code paths we don't exercise directly. Specific groups:
+  - **GTK3 stack (12 crates):** gtk-rs 0.18 bindings + glib unsound + proc-macro-error.
+    Blocked on [tauri-apps/tauri#14684](https://github.com/tauri-apps/tauri/pull/14684)
+    (GTK4 migration, targeted at Tauri 3.0) and
+    [tauri-apps/tauri#12563](https://github.com/tauri-apps/tauri/issues/12563).
+  - **kuchikiki chain (2 crates):** fxhash + rand 0.7. Pulled via
+    tauri-utils → kuchikiki (Brave fork) → selectors. Blocked on tauri-utils
+    replacing its HTML parser.
+  - **unic-\* (5 crates):** Pulled via tauri-utils → urlpattern 0.3.0.
+    urlpattern 0.6.0 exists upstream but tauri-utils 2.x pins 0.3.0.
+  Tracked in `src-tauri/deny.toml` with per-advisory upstream issue links.
+  Next review: 2026-10-19.
 - **MTG bulk import peak RSS ~1 GB.** The Scryfall bulk JSON (~200 MB) is
   loaded into memory. Documented in README system requirements.
 

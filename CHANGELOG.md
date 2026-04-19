@@ -22,6 +22,12 @@ This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 - Threat model documented in `docs/THREATMODEL.md`.
 - `SECURITY.md` updated with supported versions, accepted risks, and reporting
   instructions.
+- Bumped Tauri to 2.10.3, tauri-build to 2.5, tauri-plugin-opener to 2.5.
+  Chased all 19 RUSTSEC advisories individually — all are upstream-blocked in
+  Tauri 2.x (GTK3 stack, kuchikiki/selectors chain, urlpattern/unic chain).
+  Updated `deny.toml` with per-advisory upstream issue links and specific
+  comments. Two new advisories added to ignore list: RUSTSEC-2024-0429
+  (glib unsound) and RUSTSEC-2026-0097 (rand 0.7 unsound).
 
 ## [1.0.0-rc.1] — 2026-04-19
 

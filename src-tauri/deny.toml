@@ -4,11 +4,12 @@
 [advisories]
 version = 2
 ignore = [
-  # All transitive unmaintained deps — no fix available, pinned by Tauri 2's
-  # GTK stack on Linux + urlpattern dependency chain. Full triage in Phase 2.
-  # Review by: 2026-10-19
-
-  # GTK/GDK stack (tauri → tao → gtk)
+  # ── GTK3 stack (tauri → tao → gtk) ──────────────────────────────────────
+  # All unmaintained gtk-rs 0.18 crates. Blocked on Tauri's GTK4 migration,
+  # targeted at Tauri 3.0:
+  #   - tauri-apps/tauri#14684 (feat: migrate to GTK4 and WebKitGTK 6.0, PR open, milestone 3.0)
+  #   - tauri-apps/tauri#12563 (Upgrade tauri to gtk4-rs, open, assigned to lucasfernog)
+  # Last upstream activity: 2026-04 (PR #14684 active).
   "RUSTSEC-2024-0411", # gdkwayland-sys — unmaintained
   "RUSTSEC-2024-0412", # gdk — unmaintained
   "RUSTSEC-2024-0413", # atk — unmaintained
@@ -20,13 +21,28 @@ ignore = [
   "RUSTSEC-2024-0419", # gtk3-macros — unmaintained
   "RUSTSEC-2024-0420", # gtk-sys — unmaintained
 
-  # proc-macro-error (tauri → various proc-macro crates)
-  "RUSTSEC-2024-0370", # proc-macro-error — unmaintained, no successor
+  # glib 0.18.5 unsound Iterator/DoubleEndedIterator impls — same GTK3 stack,
+  # will resolve with the GTK4 migration above (gtk4-rs uses glib 0.20+).
+  "RUSTSEC-2024-0429", # glib — unsound
 
-  # fxhash (transitive)
+  # proc-macro-error 1.0.4 — unmaintained; used by glib-macros and gtk3-macros.
+  # Blocked on GTK4 migration (same as above). proc-macro-error2 fork exists
+  # but can't patch without also patching glib-macros (upstream-controlled).
+  "RUSTSEC-2024-0370", # proc-macro-error — unmaintained
+
+  # ── tauri-utils → kuchikiki → selectors chain ──────────────────────────
+  # fxhash 0.2.1 — unmaintained; pulled via selectors → kuchikiki → tauri-utils.
+  # Blocked on tauri-utils replacing kuchikiki (Brave fork) in the HTML parser.
   "RUSTSEC-2025-0057", # fxhash — unmaintained
 
-  # unic-* (tauri → tauri-utils → urlpattern → unic-*)
+  # rand 0.7.3 — unsound; pulled via phf_codegen → phf_generator → rand 0.7
+  # (build-dep of selectors). Same kuchikiki chain as fxhash above.
+  "RUSTSEC-2026-0097", # rand 0.7 — unsound
+
+  # ── tauri-utils → urlpattern 0.3.0 → unic-* ───────────────────────────
+  # All unmaintained. urlpattern 0.6.0 exists (denoland/rust-urlpattern) and
+  # likely drops unic, but tauri-utils 2.x pins urlpattern 0.3.0.
+  # Blocked on tauri-utils upgrading urlpattern.
   "RUSTSEC-2025-0075", # unic-char-range — unmaintained
   "RUSTSEC-2025-0080", # unic-common — unmaintained
   "RUSTSEC-2025-0081", # unic-char-property — unmaintained
