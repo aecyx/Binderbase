@@ -57,6 +57,8 @@ pub fn run() {
             commands::collection::collection_import_preview,
             commands::collection::collection_import_apply,
             commands::pricing_get_cached,
+            commands::pricing::pricing_refresh,
+            commands::pricing::pricing_refresh_collection,
             commands::scanning::scan_identify,
             commands::scanning::scan_build_index,
             commands::scanning::scan_build_index_cancel,

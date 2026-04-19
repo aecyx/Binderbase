@@ -19,6 +19,7 @@ pub mod mtg;
 pub mod pokemon;
 
 use crate::core::{Card, CardId, Game, Result};
+use crate::pricing::Price;
 
 /// Machine-readable description of a game's data + pricing sources.
 ///
@@ -50,5 +51,17 @@ pub async fn fetch_card(game: Game, id: &CardId) -> Result<Card> {
     match game {
         Game::Mtg => mtg::fetch_card(id).await,
         Game::Pokemon => pokemon::fetch_card(id).await,
+    }
+}
+
+/// Dispatch a card+prices lookup to the correct game adapter.
+pub async fn fetch_card_with_prices(
+    game: Game,
+    id: &CardId,
+    ptcg_api_key: Option<&str>,
+) -> Result<(Card, Vec<Price>)> {
+    match game {
+        Game::Mtg => mtg::fetch_card_with_prices(id).await,
+        Game::Pokemon => pokemon::fetch_card_with_prices(id, ptcg_api_key).await,
     }
 }

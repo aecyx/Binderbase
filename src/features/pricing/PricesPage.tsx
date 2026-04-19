@@ -12,6 +12,7 @@ export function PricesPage(): ReactElement {
   const [prices, setPrices] = useState<Price[]>([]);
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
+  const [refreshing, setRefreshing] = useState(false);
 
   async function handleSelect(selected: Card) {
     setError(null);
@@ -29,6 +30,20 @@ export function PricesPage(): ReactElement {
       setError(isBinderbaseError(e) ? `${e.kind}: ${e.message}` : String(e));
     } finally {
       setLoading(false);
+    }
+  }
+
+  async function handleRefresh() {
+    if (!card) return;
+    setRefreshing(true);
+    setError(null);
+    try {
+      const fresh = await api.pricing.refresh(card.game, card.id);
+      setPrices(fresh);
+    } catch (e) {
+      setError(isBinderbaseError(e) ? `${e.kind}: ${e.message}` : String(e));
+    } finally {
+      setRefreshing(false);
     }
   }
 
@@ -75,6 +90,11 @@ export function PricesPage(): ReactElement {
               className="card-image"
             />
           )}
+          <div className="form-row">
+            <button data-variant="primary" disabled={refreshing} onClick={handleRefresh}>
+              {refreshing ? "Refreshing…" : "Refresh price"}
+            </button>
+          </div>
         </article>
       )}
 
@@ -112,7 +132,7 @@ export function PricesPage(): ReactElement {
 
       {card && prices.length === 0 && !loading && !error && (
         <p className="muted">
-          No cached prices yet. Price refresh is not wired in 0.1 — see roadmap.
+          No cached prices yet. Click &quot;Refresh price&quot; to fetch the latest prices.
         </p>
       )}
     </section>

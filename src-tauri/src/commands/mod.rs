@@ -7,6 +7,7 @@
 
 pub mod catalog;
 pub mod collection;
+pub mod pricing;
 pub mod scanning;
 pub mod settings;
 
@@ -20,13 +21,14 @@ pub use collection::{
     collection_add, collection_export_csv, collection_import_apply, collection_import_preview,
     collection_list, collection_remove,
 };
+pub use pricing::{pricing_refresh, pricing_refresh_collection};
 pub use scanning::{scan_build_index, scan_build_index_cancel, scan_identify, scan_index_status};
 pub use settings::{settings_get_ptcgapi_key, settings_set_ptcgapi_key};
 
 use crate::catalog::bulk::ImportController;
 use crate::core::{Error, Game, Result};
 use crate::games;
-use crate::pricing::{self, Price};
+use crate::pricing::Price;
 use crate::scanning::index::IndexController;
 use crate::settings::{KeyringSecrets, SecretStore};
 use crate::storage::Database;
@@ -98,5 +100,5 @@ pub fn pricing_get_cached(
     game: Game,
     card_id: String,
 ) -> Result<Vec<Price>> {
-    state.with_conn(|c| pricing::get_cached(c, game, &CardId(card_id)))
+    state.with_conn(|c| crate::pricing::get_cached(c, game, &CardId(card_id)))
 }

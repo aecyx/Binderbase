@@ -3,7 +3,15 @@ import { useCallback, useEffect, useReducer, useState } from "react";
 import type { FormEvent, ReactElement } from "react";
 import { CardSearch } from "../../components/CardSearch";
 import { api } from "../../lib/tauri";
-import type { Card, CardCondition, CollectionEntry, Game, NewEntry } from "../../types";
+import type {
+  Card,
+  CardCondition,
+  CollectionEntry,
+  Game,
+  NewEntry,
+  Price,
+  RefreshProgress,
+} from "../../types";
 import { GAME_DISPLAY_NAME, isBinderbaseError } from "../../types";
 
 const CONDITIONS: { value: CardCondition; label: string }[] = [
@@ -21,6 +29,11 @@ export function CollectionPage(): ReactElement {
   const [loading, setLoading] = useState(true);
   const [showForm, setShowForm] = useState(false);
   const [removing, setRemoving] = useState<string | null>(null);
+
+  // Price cache: key = "game:card_id", value = best non-foil price or first available
+  const [priceMap, setPriceMap] = useState<Record<string, Price | null>>({});
+  const [refreshingPrices, setRefreshingPrices] = useState(false);
+  const [refreshProgress, setRefreshProgress] = useState<RefreshProgress | null>(null);
 
   // Increment to trigger a re-fetch from the effect.
   const [refreshToken, bumpRefresh] = useReducer((n: number) => n + 1, 0);
@@ -65,6 +78,73 @@ export function CollectionPage(): ReactElement {
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps -- fetchKey encodes both deps
   }, [fetchKey]);
+
+  // Load cached prices for all distinct cards whenever entries change.
+  useEffect(() => {
+    let cancelled = false;
+    const seen = new Set<string>();
+    const toFetch: { game: Game; card_id: string }[] = [];
+    for (const e of entries) {
+      const key = `${e.game}:${e.card_id}`;
+      if (!seen.has(key)) {
+        seen.add(key);
+        toFetch.push({ game: e.game, card_id: e.card_id });
+      }
+    }
+    if (toFetch.length === 0) return;
+    Promise.all(
+      toFetch.map(({ game, card_id }) =>
+        api.pricing
+          .getCached(game, card_id)
+          .then((prices) => ({ key: `${game}:${card_id}`, prices }))
+          .catch(() => ({ key: `${game}:${card_id}`, prices: [] as Price[] })),
+      ),
+    ).then((results) => {
+      if (cancelled) return;
+      const map: Record<string, Price | null> = {};
+      for (const { key, prices } of results) {
+        // Prefer non-foil USD, then any USD, then first available
+        const best =
+          prices.find((p) => p.currency === "usd" && !p.foil) ??
+          prices.find((p) => p.currency === "usd") ??
+          prices[0] ??
+          null;
+        map[key] = best;
+      }
+      setPriceMap(map);
+    });
+    return () => {
+      cancelled = true;
+    };
+  }, [entries]);
+
+  async function handleRefreshAll() {
+    setRefreshingPrices(true);
+    setRefreshProgress(null);
+    setError(null);
+    const unlisten = await api.pricing.onRefreshProgress((p) => {
+      setRefreshProgress(p);
+      if (p.done === p.total) {
+        setRefreshingPrices(false);
+        refresh(); // reload collection + prices
+      }
+    });
+    try {
+      await api.pricing.refreshCollection(filter === "all" ? undefined : filter);
+    } catch (e) {
+      setError(isBinderbaseError(e) ? `${e.kind}: ${e.message}` : String(e));
+      setRefreshingPrices(false);
+    } finally {
+      unlisten();
+    }
+  }
+
+  function formatCents(cents: number, currency: string): string {
+    return (cents / 100).toLocaleString(undefined, {
+      style: "currency",
+      currency,
+    });
+  }
 
   function resetForm() {
     setAddCard(null);
@@ -135,6 +215,14 @@ export function CollectionPage(): ReactElement {
         <button type="button" data-variant="primary" onClick={() => setShowForm((s) => !s)}>
           {showForm ? "Cancel" : "+ Add card"}
         </button>
+
+        {entries.length > 0 && (
+          <button type="button" disabled={refreshingPrices} onClick={handleRefreshAll}>
+            {refreshingPrices
+              ? `Refreshing${refreshProgress ? ` ${refreshProgress.done}/${refreshProgress.total}` : "…"}`
+              : "Refresh all prices"}
+          </button>
+        )}
       </div>
 
       {/* ---- Add-card form ---- */}
@@ -241,6 +329,7 @@ export function CollectionPage(): ReactElement {
               <th scope="col">Condition</th>
               <th scope="col">Foil</th>
               <th scope="col">Qty</th>
+              <th scope="col">Price</th>
               <th scope="col">Notes</th>
               <th scope="col"></th>
             </tr>
@@ -255,6 +344,12 @@ export function CollectionPage(): ReactElement {
                 <td>{e.condition.replace("_", " ")}</td>
                 <td>{e.foil ? "yes" : ""}</td>
                 <td>{e.quantity}</td>
+                <td className="muted">
+                  {(() => {
+                    const p = priceMap[`${e.game}:${e.card_id}`];
+                    return p ? formatCents(p.cents, p.currency) : "—";
+                  })()}
+                </td>
                 <td className="muted">{e.notes ?? ""}</td>
                 <td>
                   <button

@@ -61,6 +61,16 @@ impl Database {
         migrations::run(&conn)?;
         Ok(conn)
     }
+
+    /// Open a temporary connection, run `f`, and close it. Convenient for
+    /// background tasks that need a short-lived connection.
+    pub fn with_connection<T, F>(&self, f: F) -> Result<T>
+    where
+        F: FnOnce(&Connection) -> Result<T>,
+    {
+        let conn = self.connect()?;
+        f(&conn)
+    }
 }
 
 mod migrations;

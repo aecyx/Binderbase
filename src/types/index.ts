@@ -192,3 +192,14 @@ export interface CsvImportResult {
   skipped: number;
   errors: CsvRowError[];
 }
+
+// ---------- Price refresh ----------
+
+export interface RefreshProgress {
+  done: number;
+  total: number;
+  card_id: string;
+  game: Game;
+  ok: boolean;
+  error: string | null;
+}

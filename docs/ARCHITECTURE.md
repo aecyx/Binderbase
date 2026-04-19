@@ -53,7 +53,7 @@ ADR-0002.
 | `collection/` | CRUD over `collection_entries`.                                              |
 | `pricing/`    | Cached price reads and upserts.                                              |
 | `scanning/`   | Image decode + (future) card identification pipeline.                        |
-| `commands/`   | Tauri command surface. Split by domain: `catalog`, `collection`, `settings`. |
+| `commands/`   | Tauri command surface. Split by domain: `catalog`, `collection`, `pricing`, `settings`. |
 | `lib.rs`      | Wires modules, initializes state, registers commands.                        |
 
 ### Frontend (`src/`)
@@ -110,6 +110,8 @@ Currently:
 | `collection_import_preview(csv)`     | Dry-run CSV import — parse, validate, preview.          |
 | `collection_import_apply(csv)`       | Apply a validated CSV import.                           |
 | `pricing_get_cached(game, id)`       | Read cached prices.                                     |
+| `pricing_refresh(game, id)`          | Refresh prices for a single card from the live API.     |
+| `pricing_refresh_collection(game?)`  | Batch refresh all collection cards; emits progress.     |
 | `scan_identify(bytes, hint?)`        | Decode an image and return candidate matches (stubbed). |
 | `settings_get_ptcgapi_key`           | Read the stored Pokémon TCG API key.                    |
 | `settings_set_ptcgapi_key(value)`    | Store or clear the Pokémon TCG API key.                 |

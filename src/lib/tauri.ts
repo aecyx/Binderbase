@@ -23,6 +23,7 @@ import type {
   IndexStatus,
   NewEntry,
   Price,
+  RefreshProgress,
   ScanResult,
 } from "../types";
 
@@ -70,6 +71,11 @@ export const api = {
   pricing: {
     getCached: (game: Game, cardId: string) =>
       invoke<Price[]>("pricing_get_cached", { game, cardId }),
+    refresh: (game: Game, cardId: string) => invoke<Price[]>("pricing_refresh", { game, cardId }),
+    refreshCollection: (game?: Game) =>
+      invoke<void>("pricing_refresh_collection", { game: game ?? null }),
+    onRefreshProgress: (handler: (progress: RefreshProgress) => void) =>
+      listen<RefreshProgress>("pricing:refresh:progress", (event) => handler(event.payload)),
   },
 
   scanning: {
