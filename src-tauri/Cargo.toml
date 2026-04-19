@@ -1,6 +1,6 @@
 [package]
 name = "binderbase"
-version = "1.0.0"
+version = "0.1.0"
 description = "Local-first trading-card-game scanner and collection manager."
 authors = ["aecyx"]
 license = "AGPL-3.0-or-later"
