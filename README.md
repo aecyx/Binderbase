@@ -83,7 +83,7 @@ To verify a download (requires [cosign](https://docs.sigstore.dev/cosign/system_
 ```bash
 cosign verify-blob \
   --bundle Binderbase_1.0.0-rc.1_x64.msi.bundle \
-  --certificate-identity-regexp 'https://github.com/aecyx/Binderbase/\.github/workflows/release\.yml@.+' \
+  --certificate-identity-regexp 'https://github.com/aecyx/Binderbase/\.github/workflows/release\.yml@refs/tags/v.+' \
   --certificate-oidc-issuer 'https://token.actions.githubusercontent.com' \
   Binderbase_1.0.0-rc.1_x64.msi
 ```
