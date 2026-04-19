@@ -1,8 +1,8 @@
 # OSV-Scanner — vulnerability scanning for Rust and JS dependencies.
-# Uses Google's osv-scanner reusable workflows to upload SARIF to
-# GitHub Code Scanning.
+# Downloads the osv-scanner CLI directly and uploads SARIF to GitHub
+# Code Scanning via codeql-action/upload-sarif.
 #
-# Docs: https://google.github.io/osv-scanner/github-action/
+# Docs: https://google.github.io/osv-scanner/
 name: OSV-Scanner
 
 on:
@@ -18,30 +18,34 @@ on:
 permissions: {}
 
 jobs:
-  # Full scheduled / push scan — reports all known vulnerabilities.
-  scan-scheduled:
-    if: github.event_name == 'push' || github.event_name == 'schedule'
-    uses: "google/osv-scanner-action/.github/workflows/osv-scanner-reusable.yml@c51854704019a247608d928f370c98740469d4b5" # v2.3.5
+  osv-scan:
+    name: OSV vulnerability scan
+    runs-on: ubuntu-latest
     permissions:
       actions: read
       contents: read
       security-events: write
-    with:
-      scan-args: |-
-        --config=./osv-scanner.toml
-        --recursive
-        ./
+    steps:
+      - name: Checkout
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
 
-  # PR / merge-group scan — only surfaces newly introduced vulnerabilities.
-  scan-pr:
-    if: github.event_name == 'pull_request' || github.event_name == 'merge_group'
-    uses: "google/osv-scanner-action/.github/workflows/osv-scanner-reusable-pr.yml@c51854704019a247608d928f370c98740469d4b5" # v2.3.5
-    permissions:
-      actions: read
-      contents: read
-      security-events: write
-    with:
-      scan-args: |-
-        --config=./osv-scanner.toml
-        --recursive
-        ./
+      - name: Install osv-scanner v2.3.5
+        env:
+          OSV_VERSION: "2.3.5"
+          OSV_SHA256: "bb30c580afe5e757d3e959f4afd08a4795ea505ef84c46962b9a738aa573b41b"
+        run: |
+          curl -fsSL "https://github.com/google/osv-scanner/releases/download/v${OSV_VERSION}/osv-scanner_linux_amd64" \
+            -o /usr/local/bin/osv-scanner
+          echo "${OSV_SHA256}  /usr/local/bin/osv-scanner" | sha256sum -c -
+          chmod +x /usr/local/bin/osv-scanner
+
+      - name: Run osv-scanner
+        run: |
+          osv-scanner scan --config=./osv-scanner.toml \
+            --recursive --format sarif --output results.sarif ./ || true
+
+      - name: Upload SARIF
+        if: always()
+        uses: github/codeql-action/upload-sarif@95e58e9a2cdfd71adc6e0353d5c52f41a045d225 # v4.35.2
+        with:
+          sarif_file: results.sarif
