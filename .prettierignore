@@ -10,3 +10,6 @@ package-lock.json
 pnpm-lock.yaml
 yarn.lock
 LICENSE
+.playwright-mcp
+test-results
+playwright-report

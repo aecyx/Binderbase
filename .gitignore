@@ -66,5 +66,16 @@ $RECYCLE.BIN/
 .tmp/
 .history/
 
+# ---------- Playwright ----------
+.playwright-mcp/
+test-results/
+playwright-report/
+*.spec.ts-snapshots/
+# Playwright MCP screenshots
+collection-page.png
+import-export-page.png
+prices-page.png
+scan-page.png
+
 # Session scratch — never commit
 .test-sync
