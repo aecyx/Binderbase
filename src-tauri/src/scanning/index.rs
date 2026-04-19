@@ -181,7 +181,12 @@ pub async fn build_index(
             let card_game = card.game;
             set.spawn(async move {
                 let resp = client.get(&url).send().await.map_err(Error::from)?;
-                let bytes = resp.error_for_status().map_err(Error::from)?.bytes().await.map_err(Error::from)?;
+                let bytes = resp
+                    .error_for_status()
+                    .map_err(Error::from)?
+                    .bytes()
+                    .await
+                    .map_err(Error::from)?;
                 let hash = hashing::compute_dhash_from_bytes(&bytes)?;
                 Ok::<_, Error>((card_game, card_id, hash))
             });
@@ -203,15 +208,7 @@ pub async fn build_index(
             persist_batch(db, &batch)?;
         }
 
-        emit_progress(
-            app,
-            controller,
-            game,
-            processed,
-            total,
-            "downloading",
-            None,
-        );
+        emit_progress(app, controller, game, processed, total, "downloading", None);
 
         // Small delay between chunks to be respectful of CDN rate limits.
         tokio::time::sleep(std::time::Duration::from_millis(50)).await;
@@ -221,10 +218,7 @@ pub async fn build_index(
     Ok(processed)
 }
 
-fn persist_batch(
-    db: &Database,
-    batch: &[(Game, CardId, [u8; hashing::HASH_SIZE])],
-) -> Result<()> {
+fn persist_batch(db: &Database, batch: &[(Game, CardId, [u8; hashing::HASH_SIZE])]) -> Result<()> {
     let mut conn = db.connect()?;
     let tx = conn.transaction()?;
     for (game, card_id, hash) in batch {

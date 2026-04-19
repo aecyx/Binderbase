@@ -178,7 +178,7 @@ the binary. Every user gets the same SQLite version we tested against.
 
 **Status**: Accepted  
 **Date**: 2025-01-01  
-**Deciders**: AI-assisted design  
+**Deciders**: AI-assisted design
 
 ### Context
 
@@ -197,11 +197,11 @@ horizontal difference). Match by Hamming distance with confidence = 1 − (dista
 
 ### Alternatives considered
 
-| Option | Pros | Cons |
-|---|---|---|
-| pHash (DCT-based) | More robust to scaling | Heavier computation, external crate |
-| Learned embeddings (CLIP/MobileNet) | Highest accuracy | Large model, ONNX runtime, complex |
-| OCR-first | Works for text-heavy cards | Fails on art-only cards, language issues |
+| Option                              | Pros                       | Cons                                     |
+| ----------------------------------- | -------------------------- | ---------------------------------------- |
+| pHash (DCT-based)                   | More robust to scaling     | Heavier computation, external crate      |
+| Learned embeddings (CLIP/MobileNet) | Highest accuracy           | Large model, ONNX runtime, complex       |
+| OCR-first                           | Works for text-heavy cards | Fails on art-only cards, language issues |
 
 ### Consequences
 

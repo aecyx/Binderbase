@@ -54,9 +54,7 @@ pub async fn scan_build_index(
                 message: Some(e.to_string()),
             };
             controller.record_progress(progress.clone());
-            if let Err(emit_err) =
-                app.emit(scanning::index::INDEX_PROGRESS_EVENT, &progress)
-            {
+            if let Err(emit_err) = app.emit(scanning::index::INDEX_PROGRESS_EVENT, &progress) {
                 tracing::warn!(error = %emit_err, "emit index progress failed");
             }
         }
