@@ -44,19 +44,19 @@ pub fn run() {
         .manage(state)
         .invoke_handler(tauri::generate_handler![
             commands::app_info,
-            commands::fetch_card,
-            commands::catalog_get,
-            commands::catalog_search,
-            commands::catalog_import_start,
-            commands::catalog_import_cancel,
-            commands::catalog_import_status,
-            commands::collection_list,
-            commands::collection_add,
-            commands::collection_remove,
+            commands::catalog::fetch_card,
+            commands::catalog::catalog_get,
+            commands::catalog::catalog_search,
+            commands::catalog::catalog_import_start,
+            commands::catalog::catalog_import_cancel,
+            commands::catalog::catalog_import_status,
+            commands::collection::collection_list,
+            commands::collection::collection_add,
+            commands::collection::collection_remove,
             commands::pricing_get_cached,
             commands::scan_identify,
-            commands::settings_get_ptcgapi_key,
-            commands::settings_set_ptcgapi_key,
+            commands::settings::settings_get_ptcgapi_key,
+            commands::settings::settings_set_ptcgapi_key,
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");

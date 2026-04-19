@@ -45,15 +45,24 @@ Binderbase/
 │       ├── core/         # Shared types and errors
 │       ├── games/        # Per-game adapters (MTG, Pokemon)
 │       ├── storage/      # SQLite + migrations
+│       ├── catalog/      # Local card metadata cache + bulk import
 │       ├── collection/   # Local collection CRUD
 │       ├── pricing/      # Cached prices
 │       ├── scanning/     # Image identification
-│       └── commands.rs   # Tauri command surface
+│       ├── settings/     # Preferences (SQLite) + secrets (OS keychain)
+│       └── commands/     # Tauri command surface (one file per domain)
 ├── docs/                 # Architecture notes and ADRs
-└── .github/              # CI and issue/PR templates
+└── .github/              # CI, issue/PR templates, community health docs
 ```
 
 ## Coding standards
+
+### File organization
+
+Every file should have a single, clear responsibility. When a module grows
+beyond ~300 lines of production code (excluding tests), split it into a
+directory module (`mod.rs` + submodules). The `mod.rs` re-exports the public
+surface so callers never need to know about the internal split.
 
 ### TypeScript / React
 

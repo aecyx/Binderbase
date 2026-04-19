@@ -43,16 +43,18 @@ ADR-0002.
 
 ### Backend (`src-tauri/src/`)
 
-| Module        | Responsibility                                                            |
-| ------------- | ------------------------------------------------------------------------- |
-| `core/`       | Shared types (`Game`, `Card`, `CardCondition`, IDs) and the `Error` enum. |
-| `games/`      | Per-game adapters. `mtg.rs` talks to Scryfall, `pokemon.rs` to PTCGAPI.   |
-| `storage/`    | SQLite connection, schema, and migrations (`schema_vN.sql`).              |
-| `collection/` | CRUD over `collection_entries`.                                           |
-| `pricing/`    | Cached price reads and upserts.                                           |
-| `scanning/`   | Image decode + (future) card identification pipeline.                     |
-| `commands.rs` | The Tauri command surface. Every `#[tauri::command]` lives here.          |
-| `lib.rs`      | Wires modules, initializes state, registers commands.                     |
+| Module        | Responsibility                                                               |
+| ------------- | ---------------------------------------------------------------------------- |
+| `core/`       | Shared types (`Game`, `Card`, `CardCondition`, IDs) and the `Error` enum.    |
+| `games/`      | Per-game adapters. `mtg.rs` talks to Scryfall, `pokemon.rs` to PTCGAPI.      |
+| `storage/`    | SQLite connection, schema, and migrations (`schema_vN.sql`).                 |
+| `catalog/`    | Local reads/writes for the `cards` table + bulk import (`bulk/`).            |
+| `settings/`   | Non-secret prefs (SQLite) and secret credentials (OS keychain).              |
+| `collection/` | CRUD over `collection_entries`.                                              |
+| `pricing/`    | Cached price reads and upserts.                                              |
+| `scanning/`   | Image decode + (future) card identification pipeline.                        |
+| `commands/`   | Tauri command surface. Split by domain: `catalog`, `collection`, `settings`. |
+| `lib.rs`      | Wires modules, initializes state, registers commands.                        |
 
 ### Frontend (`src/`)
 
@@ -80,6 +82,9 @@ See `src-tauri/src/storage/schema_v1.sql` for the authoritative DDL. Summary:
   Prices stored as integer `cents` (avoiding float issues).
 - `scan_events(scan_id, game, matched_card_id, confidence, image_path)` —
   audit log for scans, lets us improve matching over time.
+- `schema_version(version)` — single row tracking the applied migration level.
+- `settings(key, value)` — generic key-value store for non-secret preferences.
+- `catalog_imports(import_id, game, status, ...)` — audit log for bulk imports.
 
 Schema versioning is tracked by `PRAGMA user_version`; migrations are
 accumulating `schema_vN.sql` files applied in order by
@@ -89,15 +94,22 @@ accumulating `schema_vN.sql` files applied in order by
 
 Currently:
 
-| Command                        | Purpose                                                 |
-| ------------------------------ | ------------------------------------------------------- |
-| `app_info`                     | Version, build metadata, DB path.                       |
-| `fetch_card(game, card_id)`    | Live catalog lookup via the game adapter.               |
-| `collection_list(game?)`       | List collection, optionally filtered.                   |
-| `collection_add(entry)`        | Insert a collection entry.                              |
-| `collection_remove(entry_id)`  | Delete by entry id.                                     |
-| `pricing_get_cached(game, id)` | Read cached prices.                                     |
-| `scan_identify(bytes, hint?)`  | Decode an image and return candidate matches (stubbed). |
+| Command                              | Purpose                                                 |
+| ------------------------------------ | ------------------------------------------------------- |
+| `app_info`                           | Version, build metadata, DB path, supported games.      |
+| `fetch_card(game, card_id)`          | Local-first lookup; falls through to live API on miss.  |
+| `catalog_get(game, card_id)`         | Local catalog read — no network.                        |
+| `catalog_search(game?, query, lim?)` | Substring search for autocomplete.                      |
+| `catalog_import_start`               | Kick off background bulk import of all games.           |
+| `catalog_import_cancel`              | Request cancellation of a running import.               |
+| `catalog_import_status`              | Poll progress, in-progress flag, last runs per game.    |
+| `collection_list(game?)`             | List collection, optionally filtered.                   |
+| `collection_add(entry)`              | Insert a collection entry.                              |
+| `collection_remove(entry_id)`        | Delete by entry id.                                     |
+| `pricing_get_cached(game, id)`       | Read cached prices.                                     |
+| `scan_identify(bytes, hint?)`        | Decode an image and return candidate matches (stubbed). |
+| `settings_get_ptcgapi_key`           | Read the stored Pokémon TCG API key.                    |
+| `settings_set_ptcgapi_key(value)`    | Store or clear the Pokémon TCG API key.                 |
 
 All errors serialize as `{ kind, message }` — matched by the TS
 `BinderbaseError` discriminated union. UI should branch on `kind`, not parse
