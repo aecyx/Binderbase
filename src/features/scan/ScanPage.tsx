@@ -2,8 +2,87 @@
 import { useState } from "react";
 import type { ReactElement } from "react";
 import { api } from "../../lib/tauri";
-import type { Game, ScanResult } from "../../types";
+import type { CardCondition, Game, ScanMatch, ScanResult } from "../../types";
 import { GAME_DISPLAY_NAME, isBinderbaseError } from "../../types";
+
+const CONDITIONS: { value: CardCondition; label: string }[] = [
+  { value: "near_mint", label: "Near Mint" },
+  { value: "lightly_played", label: "Lightly Played" },
+  { value: "moderately_played", label: "Moderately Played" },
+  { value: "heavily_played", label: "Heavily Played" },
+  { value: "damaged", label: "Damaged" },
+];
+
+/** Inline quick-add form shown next to a scan match. */
+function AddFromScan({ match }: { match: ScanMatch }): ReactElement {
+  const [open, setOpen] = useState(false);
+  const [condition, setCondition] = useState<CardCondition>("near_mint");
+  const [foil, setFoil] = useState(false);
+  const [qty, setQty] = useState(1);
+  const [busy, setBusy] = useState(false);
+  const [added, setAdded] = useState(false);
+  const [err, setErr] = useState<string | null>(null);
+
+  async function handleAdd() {
+    setBusy(true);
+    setErr(null);
+    try {
+      await api.collection.add({
+        game: match.game,
+        card_id: match.card_id,
+        condition,
+        foil,
+        quantity: qty,
+      });
+      setAdded(true);
+      setOpen(false);
+    } catch (e) {
+      setErr(isBinderbaseError(e) ? e.message : String(e));
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  if (added) return <span className="muted">Added ✓</span>;
+
+  if (!open) {
+    return (
+      <button type="button" onClick={() => setOpen(true)}>
+        + Collection
+      </button>
+    );
+  }
+
+  return (
+    <span className="scan-match__add-form">
+      <select value={condition} onChange={(e) => setCondition(e.target.value as CardCondition)}>
+        {CONDITIONS.map((c) => (
+          <option key={c.value} value={c.value}>
+            {c.label}
+          </option>
+        ))}
+      </select>
+      <label>
+        <input type="checkbox" checked={foil} onChange={(e) => setFoil(e.target.checked)} /> Foil
+      </label>
+      <input
+        type="number"
+        min={1}
+        max={9999}
+        value={qty}
+        onChange={(e) => setQty(Math.max(1, Number(e.target.value)))}
+        style={{ width: "3.5rem" }}
+      />
+      <button type="button" disabled={busy} onClick={handleAdd}>
+        {busy ? "…" : "Add"}
+      </button>
+      <button type="button" onClick={() => setOpen(false)}>
+        ✕
+      </button>
+      {err && <span className="error">{err}</span>}
+    </span>
+  );
+}
 
 export function ScanPage(): ReactElement {
   const [game, setGame] = useState<Game>("mtg");
@@ -85,6 +164,8 @@ export function ScanPage(): ReactElement {
                     <span className="muted">
                       {Math.round(m.confidence * 100)}% · {m.card_id}
                     </span>
+                    <br />
+                    <AddFromScan match={m} />
                   </div>
                 </li>
               ))}
