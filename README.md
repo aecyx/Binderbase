@@ -4,6 +4,8 @@
 [![CI](https://github.com/aecyx/Binderbase/actions/workflows/ci.yml/badge.svg)](https://github.com/aecyx/Binderbase/actions/workflows/ci.yml)
 [![OpenSSF Scorecard](https://api.securityscorecards.dev/projects/github.com/aecyx/Binderbase/badge)](https://securityscorecards.dev/viewer/?uri=github.com/aecyx/Binderbase)
 
+<!-- [![CII Best Practices](https://www.bestpractices.dev/projects/XXXX/badge)](https://www.bestpractices.dev/projects/XXXX) -->
+
 A local-first trading-card-game scanner and collection manager.
 
 ## What it does
