@@ -43,8 +43,12 @@ jobs:
         id: scan
         continue-on-error: true
         run: |
+          set +e
           osv-scanner scan --config=./osv-scanner.toml \
             --recursive --format sarif --output results.sarif ./
+          rc=$?
+          echo "exit_code=$rc" >> "$GITHUB_OUTPUT"
+          exit $rc
 
       - name: Upload SARIF
         if: always()
@@ -54,6 +58,12 @@ jobs:
 
       - name: Enforce scan result
         if: steps.scan.outcome == 'failure'
+        env:
+          SCAN_EXIT_CODE: ${{ steps.scan.outputs.exit_code }}
         run: |
-          echo "::error::osv-scanner found vulnerabilities not covered by osv-scanner.toml ignores"
+          if [ "$SCAN_EXIT_CODE" = "1" ]; then
+            echo "::error::osv-scanner found vulnerabilities not covered by osv-scanner.toml ignores"
+          else
+            echo "::error::osv-scanner failed with unexpected exit code ${SCAN_EXIT_CODE} (check scanner configuration or CLI errors above)"
+          fi
           exit 1
