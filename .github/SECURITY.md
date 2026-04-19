@@ -2,13 +2,13 @@
 
 ## Supported versions
 
-Binderbase is pre-1.0. Only the latest `main` branch and the most recent
-released version receive security updates.
+Only the `1.0.x` line (latest patch) is supported once shipped. Pre-release
+lines are unsupported after the corresponding stable release ships.
 
 | Version        | Supported |
 | -------------- | --------- |
+| `1.0.x`        | Yes       |
 | `main`         | Yes       |
-| latest release | Yes       |
 | older releases | No        |
 
 ## Reporting a vulnerability
@@ -71,3 +71,22 @@ We will not pursue legal action against researchers who:
 The `main` branch is protected by a GitHub ruleset. The intended policy is
 documented in [`.github/branch-protection.yml`](branch-protection.yml). The
 repo admin applies the ruleset via the GitHub UI.
+
+## Accepted risks
+
+The following are known, documented trade-offs accepted for the 1.0 release:
+
+- **Unsigned native binaries.** Windows and macOS binaries are not code-signed
+  (no EV/Developer ID certificate). Users verify downloads via cosign keyless
+  signatures and SHA256 checksums attached to each release.
+- **Transitive unmaintained dependencies.** Tauri 2's GTK3 stack on Linux and
+  the `urlpattern` dependency chain pull in unmaintained crates (gtk-rs 0.18,
+  unic-\*, proc-macro-error, fxhash). These are all `unmaintained` advisories,
+  not active vulnerabilities. Tracked in `src-tauri/deny.toml` with a 6-month
+  review cadence; will clear as Tauri migrates to gtk4-rs.
+- **MTG bulk import peak RSS ~1 GB.** The Scryfall bulk JSON (~200 MB) is
+  loaded into memory. Documented in README system requirements.
+
+## Threat model
+
+See [`docs/THREATMODEL.md`](../docs/THREATMODEL.md) for the full threat model.
