@@ -29,7 +29,7 @@ To verify (requires [cosign](https://docs.sigstore.dev/cosign/system_config/inst
 cosign verify-blob \
   --bundle Binderbase_1.0.0_amd64.msi.bundle \
   --certificate-oidc-issuer https://token.actions.githubusercontent.com \
-  --certificate-identity-regexp "github.com/aecyx/Binderbase" \
+  --certificate-identity-regexp "^https://github\\.com/aecyx/Binderbase/\\.github/workflows/release\\.yml@refs/tags/.*$" \
   Binderbase_1.0.0_amd64.msi
 ```
 
