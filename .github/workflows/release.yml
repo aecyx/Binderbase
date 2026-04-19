@@ -127,6 +127,12 @@ jobs:
         run: |
           cd assets
           for artifact in *; do
+            case "$artifact" in
+              SHA256SUMS.txt|*.bundle)
+                echo "Skipping $artifact ..."
+                continue
+                ;;
+            esac
             echo "Signing $artifact ..."
             cosign sign-blob --yes --bundle "${artifact}.bundle" "$artifact"
           done
