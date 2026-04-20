@@ -75,19 +75,22 @@ admin applies the ruleset via the GitHub UI.
 
 ### Solo-maintainer tradeoffs
 
-Binderbase is currently single-maintainer, which forces two
-Branch-Protection concessions:
+Binderbase is currently single-maintainer, which forces three branch-
+protection concessions:
 
 1. **Required approving review count is `1`, not `2`.**
    Setting the count to `2` would make merges impossible without a
    co-maintainer or a third-party bot reviewer.
 2. **Admin enforcement is off** (`enforce_admins: false`).
    The repo admin must be able to bypass the approval requirement to
-   merge their own PRs. With admin enforcement on, no one can approve.
+   merge their own PRs.
+3. **Code-owner review is not required** (`require_code_owner_review: false`).
+   CODEOWNERS assigns `*` to `@aecyx`; GitHub does not allow PR authors
+   to approve their own PRs, so enabling this would deadlock every PR.
 
-Both cost ~1 point each on the OpenSSF Scorecard Branch-Protection
+These cost ~1 point each on the OpenSSF Scorecard Branch-Protection
 check. The tradeoffs are accepted; if a second maintainer is added in
-the future, both will be tightened in the same PR that adds them to
+the future, all three will be tightened in the same PR that updates
 CODEOWNERS.
 
 Other Branch-Protection settings:
@@ -95,7 +98,6 @@ Other Branch-Protection settings:
 - Force pushes blocked.
 - Branch deletion blocked.
 - Linear history required.
-- Code-owner review required.
 - Stale reviews dismissed on new pushes.
 - Approval of the most recent reviewable push required.
 - All status checks listed in `branch-protection.yml` must pass.

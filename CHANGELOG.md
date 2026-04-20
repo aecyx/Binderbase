@@ -8,7 +8,14 @@ This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 
 ## [Unreleased]
 
-_No unreleased changes yet._
+### Security
+
+- Branch protection on `main` tightened: enabled "require approval of
+  most recent reviewable push", added OSV-Scanner to required status
+  checks, and updated `.github/branch-protection.yml` to match the
+  live ruleset. Admin-enforcement, code-owner review, and required
+  reviewer count >1 remain off (solo-maintainer tradeoffs documented
+  in .github/SECURITY.md).
 
 ## [1.0.0-rc.1] — 2026-04-19
 
@@ -70,12 +77,6 @@ _No unreleased changes yet._
   non-vulnerability INFO advisories.
 - OSV-Scanner CI workflow (weekly + push/PR) uploading SARIF to GitHub Code
   Scanning, SHA-pinned to google/osv-scanner-action v2.3.5.
-- Branch protection on `main` tightened: enabled "require approval of
-  most recent reviewable push", added OSV-Scanner to required status
-  checks, set `require_code_owner_review: true`, and updated
-  `.github/branch-protection.yml` to match the live ruleset.
-  Admin-enforcement left off and required reviewer count stays at 1
-  (solo-maintainer tradeoffs documented in `.github/SECURITY.md`).
 
 [Unreleased]: https://github.com/aecyx/Binderbase/compare/v1.0.0-rc.1...HEAD
 [1.0.0-rc.1]: https://github.com/aecyx/Binderbase/releases/tag/v1.0.0-rc.1
