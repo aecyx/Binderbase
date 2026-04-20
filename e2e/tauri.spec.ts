@@ -26,12 +26,13 @@ test("app loads with correct title", async () => {
   expect(title).toBe("Binderbase");
 });
 
-test("nav bar has all four tabs", async () => {
+test("nav bar has all five tabs", async () => {
   const nav = page.getByRole("navigation", { name: "Primary" });
   await expect(nav.getByRole("button", { name: "Scan" })).toBeVisible();
   await expect(nav.getByRole("button", { name: "Collection" })).toBeVisible();
   await expect(nav.getByRole("button", { name: "Prices" })).toBeVisible();
   await expect(nav.getByRole("button", { name: "Import / Export" })).toBeVisible();
+  await expect(nav.getByRole("button", { name: "Settings" })).toBeVisible();
 });
 
 // ---------- Scan page ----------
