@@ -69,7 +69,7 @@ export function SettingsPage({ appInfo }: Props): ReactElement {
         Your collection, catalog cache, and prices are stored in a local SQLite database.
       </p>
       <div className="form-row">
-        <label>Location</label>
+        <span>Location</span>
         <code>{appInfo?.db_path ?? "…"}</code>
       </div>
 
