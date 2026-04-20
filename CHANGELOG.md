@@ -15,7 +15,7 @@ This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
   checks, set `require_code_owner_review: true`, and updated
   `.github/branch-protection.yml` to match the live ruleset.
   Admin-enforcement left off and required reviewer count stays at 1
-  (solo-maintainer tradeoffs documented in SECURITY.md).
+  (solo-maintainer tradeoffs documented in `.github/SECURITY.md`).
 
 ## [1.0.0-rc.1] — 2026-04-19
 
