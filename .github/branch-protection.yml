@@ -8,10 +8,10 @@
 rules_for: main
 require_pull_request:
   required_approvals: 1
-  # NOTE: Stays at 1 because Binderbase is single-maintainer. Raising
-  # to 2 would make merges impossible without a co-maintainer or a
-  # bot reviewer. Documented as accepted tradeoff in
-  # .github/SECURITY.md.
+  # NOTE: GitHub Copilot code review provides the required approval,
+  # allowing the solo maintainer to merge with enforce_admins on.
+  # Raising to 2 is not needed while Copilot satisfies the 1-review
+  # requirement. Documented in .github/SECURITY.md.
   dismiss_stale_reviews: true
   require_code_owner_review: true
   require_last_push_approval: true
@@ -30,4 +30,4 @@ require_signed_commits: false # opt-in when contributors are comfortable with gp
 require_linear_history: true
 block_force_pushes: true
 restrict_deletions: true
-enforce_admins: false # solo-maintainer: admin must bypass approval to merge own PRs
+enforce_admins: true # Copilot code review provides the required approval

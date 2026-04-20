@@ -73,21 +73,19 @@ policy is documented in
 [`.github/branch-protection.yml`](branch-protection.yml). The repo
 admin applies the ruleset via the GitHub UI.
 
-### Solo-maintainer tradeoffs
+### Solo-maintainer note
 
-Binderbase is currently single-maintainer, which forces two
-Branch-Protection concessions:
+Required approving review count on `main` is `1`, not `2`. GitHub
+Copilot code review is enabled as an automatic reviewer, which
+provides the required approval on every PR. This allows
+`enforce_admins: true` (the repo admin is bound by the same rules as
+everyone else) without blocking merges.
 
-1. **Required approving review count is `1`, not `2`.**
-   Setting the count to `2` would make merges impossible without a
-   co-maintainer or a third-party bot reviewer.
-2. **Admin enforcement is off** (`enforce_admins: false`).
-   The repo admin must be able to bypass the approval requirement to
-   merge their own PRs. With admin enforcement on, no one can approve.
-
-Both cost ~1 point each on the OpenSSF Scorecard Branch-Protection
-check. The tradeoffs are accepted; if a second maintainer is added in
-the future, both will be tightened in the same PR that adds them to
+The review count stays at `1` rather than `2` because Copilot is the
+only non-human reviewer; raising to `2` would re-introduce the
+original solo-maintainer deadlock. This costs ~1 point on the OpenSSF
+Scorecard Branch-Protection check. If a second maintainer is added,
+the count will be raised to `2` in the same PR that adds them to
 CODEOWNERS.
 
 Other Branch-Protection settings:
@@ -98,6 +96,7 @@ Other Branch-Protection settings:
 - Code-owner review required.
 - Stale reviews dismissed on new pushes.
 - Approval of the most recent reviewable push required.
+- Repo admin (Matt) is bound by the same rules — no bypass.
 - All status checks listed in `branch-protection.yml` must pass.
 
 ## Accepted risks
