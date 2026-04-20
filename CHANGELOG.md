@@ -8,6 +8,15 @@ This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 
 ## [Unreleased]
 
+(no entries)
+
+## [1.0.0] — 2026-04-20
+
+### Added
+
+- **Settings page** — Configure Pokémon TCG API key and view data directory
+  location via a dedicated Settings tab in the navigation.
+
 ### Security
 
 - Branch protection on `main` tightened: enabled "require approval of
@@ -16,6 +25,13 @@ This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
   live ruleset. Admin-enforcement, code-owner review, and required
   reviewer count >1 remain off (solo-maintainer tradeoffs documented
   in .github/SECURITY.md).
+- End-to-end cosign verification of release artifacts documented in
+  `docs/release/cosign-verification.md`.
+
+### Tested
+
+- E2E Playwright coverage added for the catalog import flow:
+  start → progress → cancel → restart.
 
 ## [1.0.0-rc.1] — 2026-04-19
 
@@ -78,5 +94,6 @@ This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 - OSV-Scanner CI workflow (weekly + push/PR) uploading SARIF to GitHub Code
   Scanning, SHA-pinned to google/osv-scanner-action v2.3.5.
 
-[Unreleased]: https://github.com/aecyx/Binderbase/compare/v1.0.0-rc.1...HEAD
+[Unreleased]: https://github.com/aecyx/Binderbase/compare/v1.0.0...HEAD
+[1.0.0]: https://github.com/aecyx/Binderbase/compare/v1.0.0-rc.1...v1.0.0
 [1.0.0-rc.1]: https://github.com/aecyx/Binderbase/releases/tag/v1.0.0-rc.1

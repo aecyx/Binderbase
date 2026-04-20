@@ -90,4 +90,9 @@ export const api = {
     onIndexProgress: (handler: (progress: IndexProgress) => void) =>
       listen<IndexProgress>("scan:index:progress", (event) => handler(event.payload)),
   },
+
+  settings: {
+    getPtcgApiKey: () => invoke<string | null>("settings_get_ptcgapi_key"),
+    setPtcgApiKey: (value: string) => invoke<void>("settings_set_ptcgapi_key", { value }),
+  },
 };
