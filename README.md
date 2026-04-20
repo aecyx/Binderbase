@@ -31,7 +31,7 @@ refresh from public sources (Scryfall, Pokémon TCG API) and are cached locally.
 
 ## Status
 
-Release candidate. Download the latest build from
+Stable release. Download the latest build from
 [Releases](https://github.com/aecyx/Binderbase/releases).
 
 ## Quick start
@@ -89,6 +89,8 @@ cosign verify-blob \
 ```
 
 Replace the file names with the actual artifact you downloaded.
+
+A worked example of the full verification is in [`docs/release/cosign-verification.md`](docs/release/cosign-verification.md).
 
 ## Scanning limitations
 
