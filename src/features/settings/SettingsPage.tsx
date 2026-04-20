@@ -45,9 +45,10 @@ export function SettingsPage({ appInfo }: Props): ReactElement {
     setError(null);
     setSuccess(null);
     try {
-      await api.settings.setPtcgApiKey(apiKey);
       const trimmed = apiKey.trim();
+      await api.settings.setPtcgApiKey(trimmed);
       setSavedKey(trimmed || null);
+      setApiKey(trimmed);
       setSuccess(trimmed ? "API key saved." : "API key cleared.");
     } catch (e) {
       setError(isBinderbaseError(e) ? `${e.kind}: ${e.message}` : String(e));
