@@ -10,13 +10,12 @@ This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 
 ### Security
 
-- Branch protection on `main` tightened: enabled admin-enforcement,
-  enabled "require approval of most recent reviewable push", added
-  OSV-Scanner to required status checks, set
-  `require_code_owner_review: true`, and updated
-  `.github/branch-protection.yml` to match the live ruleset.
-  GitHub Copilot code review enabled as automatic reviewer to satisfy
-  the required-approval check (solo-maintainer note in SECURITY.md).
+- Branch protection on `main` tightened: enabled "require approval of
+  most recent reviewable push", added OSV-Scanner to required status
+  checks, and updated `.github/branch-protection.yml` to match the
+  live ruleset. Admin-enforcement, code-owner review, and required
+  reviewer count >1 remain off (solo-maintainer tradeoffs documented
+  in SECURITY.md).
 
 ## [1.0.0-rc.1] — 2026-04-19
 

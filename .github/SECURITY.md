@@ -73,19 +73,24 @@ policy is documented in
 [`.github/branch-protection.yml`](branch-protection.yml). The repo
 admin applies the ruleset via the GitHub UI.
 
-### Solo-maintainer note
+### Solo-maintainer tradeoffs
 
-Required approving review count on `main` is `1`, not `2`. GitHub
-Copilot code review is enabled as an automatic reviewer, which
-provides the required approval on every PR. This allows
-`enforce_admins: true` (the repo admin is bound by the same rules as
-everyone else) without blocking merges.
+Binderbase is currently single-maintainer, which forces three
+Branch-Protection concessions:
 
-The review count stays at `1` rather than `2` because Copilot is the
-only non-human reviewer; raising to `2` would re-introduce the
-original solo-maintainer deadlock. This costs ~1 point on the OpenSSF
-Scorecard Branch-Protection check. If a second maintainer is added,
-the count will be raised to `2` in the same PR that adds them to
+1. **Required approving review count is `1`, not `2`.**
+   Setting the count to `2` would make merges impossible without a
+   co-maintainer or a third-party bot reviewer.
+2. **Admin enforcement is off** (`enforce_admins: false`).
+   The repo admin must be able to bypass the approval requirement to
+   merge their own PRs.
+3. **Code-owner review is not required** (`require_code_owner_review: false`).
+   CODEOWNERS assigns `*` to `@aecyx`; GitHub does not allow PR authors
+   to approve their own PRs, so enabling this would deadlock every PR.
+
+These cost ~1 point each on the OpenSSF Scorecard Branch-Protection
+check. The tradeoffs are accepted; if a second maintainer is added in
+the future, all three will be tightened in the same PR that updates
 CODEOWNERS.
 
 Other Branch-Protection settings:
@@ -93,10 +98,8 @@ Other Branch-Protection settings:
 - Force pushes blocked.
 - Branch deletion blocked.
 - Linear history required.
-- Code-owner review required.
 - Stale reviews dismissed on new pushes.
 - Approval of the most recent reviewable push required.
-- Repo admin (Matt) is bound by the same rules — no bypass.
 - All status checks listed in `branch-protection.yml` must pass.
 
 ## Accepted risks
