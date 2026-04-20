@@ -1,13 +1,14 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 import type { ReactElement } from "react";
 
-export type Route = "scan" | "collection" | "pricing" | "import_export";
+export type Route = "scan" | "collection" | "pricing" | "import_export" | "settings";
 
 const ROUTES: { id: Route; label: string }[] = [
   { id: "scan", label: "Scan" },
   { id: "collection", label: "Collection" },
   { id: "pricing", label: "Prices" },
   { id: "import_export", label: "Import / Export" },
+  { id: "settings", label: "Settings" },
 ];
 
 interface Props {

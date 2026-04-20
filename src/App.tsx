@@ -8,6 +8,7 @@ import { ScanPage } from "./features/scan/ScanPage";
 import { CollectionPage } from "./features/collection/CollectionPage";
 import { PricesPage } from "./features/pricing/PricesPage";
 import { ImportExportPage } from "./features/import_export/ImportExportPage";
+import { SettingsPage } from "./features/settings/SettingsPage";
 import { api } from "./lib/tauri";
 import type { AppInfo, ImportStatus } from "./types";
 import "./App.css";
@@ -69,6 +70,7 @@ function App(): ReactElement {
         {route === "collection" && <CollectionPage />}
         {route === "pricing" && <PricesPage />}
         {route === "import_export" && <ImportExportPage />}
+        {route === "settings" && <SettingsPage appInfo={info} />}
       </main>
       {info && (
         <footer className="app__footer">
