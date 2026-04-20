@@ -36,68 +36,70 @@ test.beforeAll(async () => {
   await expect(page.getByRole("heading", { name: "Catalog Import" })).toBeVisible();
 });
 
-// ---------------------------------------------------------------------------
-// Test 1: start → progress visible → cancel → buttons re-enabled
-// ---------------------------------------------------------------------------
-test("import pokemon: start, see progress, cancel, buttons re-enabled", async () => {
-  // Click "Import Pokémon"
-  const importPokemonBtn = page.getByRole("button", { name: "Import Pokémon" });
-  await importPokemonBtn.click();
+test.describe.serial("catalog import restart flow", () => {
+  // ---------------------------------------------------------------------------
+  // Test 1: start → progress visible → cancel → buttons re-enabled
+  // ---------------------------------------------------------------------------
+  test("import pokemon: start, see progress, cancel, buttons re-enabled", async () => {
+    // Click "Import Pokémon"
+    const importPokemonBtn = page.getByRole("button", { name: "Import Pokémon" });
+    await importPokemonBtn.click();
 
-  // Within 10s the Cancel button must appear (in_progress === true).
-  const cancelBtn = page.getByRole("button", { name: "Cancel" });
-  await expect(cancelBtn).toBeVisible({ timeout: 10_000 });
+    // Within 10s the Cancel button must appear (in_progress === true).
+    const cancelBtn = page.getByRole("button", { name: "Cancel" });
+    await expect(cancelBtn).toBeVisible({ timeout: 10_000 });
 
-  // Within 30s either a <progress> element or a known stage label appears.
-  const progressBar = page.locator("progress.import-panel__bar");
-  const stageLabel = page.locator(".import-panel__stage .muted");
-  const knownStages = [
-    "Fetching catalog index\u2026",
-    "Downloading\u2026",
-    "Parsing\u2026",
-    "Importing cards\u2026",
-  ];
+    // Within 30s either a <progress> element or a known stage label appears.
+    const progressBar = page.locator("progress.import-panel__bar");
+    const stageLabel = page.locator(".import-panel__stage .muted");
+    const knownStages = [
+      "Fetching catalog index\u2026",
+      "Downloading\u2026",
+      "Parsing\u2026",
+      "Importing cards\u2026",
+    ];
 
-  await expect(async () => {
-    const barVisible = await progressBar.isVisible().catch(() => false);
-    if (barVisible) return; // progress bar appeared — success
+    await expect(async () => {
+      const barVisible = await progressBar.isVisible().catch(() => false);
+      if (barVisible) return; // progress bar appeared — success
 
-    const labelText = await stageLabel.textContent().catch(() => "");
-    const stageMatched = knownStages.some((s) => labelText?.includes(s));
-    expect(barVisible || stageMatched).toBe(true);
-  }).toPass({ timeout: 30_000 });
+      const labelText = await stageLabel.textContent().catch(() => "");
+      const stageMatched = knownStages.some((s) => labelText?.includes(s));
+      expect(barVisible || stageMatched).toBe(true);
+    }).toPass({ timeout: 30_000 });
 
-  // Click Cancel.
-  await cancelBtn.click();
+    // Click Cancel.
+    await cancelBtn.click();
 
-  // Within 15s the Import buttons must become enabled and Cancel must vanish.
-  await expect(cancelBtn).not.toBeVisible({ timeout: 15_000 });
-  await expect(importPokemonBtn).toBeEnabled({ timeout: 15_000 });
-  await expect(page.getByRole("button", { name: "Import Magic: The Gathering" })).toBeEnabled();
-  await expect(page.getByRole("button", { name: "Import all games" })).toBeEnabled();
+    // Within 15s the Import buttons must become enabled and Cancel must vanish.
+    await expect(cancelBtn).not.toBeVisible({ timeout: 15_000 });
+    await expect(importPokemonBtn).toBeEnabled({ timeout: 15_000 });
+    await expect(page.getByRole("button", { name: "Import Magic: The Gathering" })).toBeEnabled();
+    await expect(page.getByRole("button", { name: "Import all games" })).toBeEnabled();
 
-  // A "Pokémon" run summary with a "cancelled" badge must render.
-  const historySection = page.locator(".import-panel__history");
-  await expect(historySection.locator(".import-run")).toContainText("Pokémon");
-  await expect(historySection.locator(".import-run__badge--cancelled")).toBeVisible();
-});
+    // A "Pokémon" run summary with a "cancelled" badge must render.
+    const historySection = page.locator(".import-panel__history");
+    await expect(historySection.locator(".import-run")).toContainText("Pokémon");
+    await expect(historySection.locator(".import-run__badge--cancelled")).toBeVisible();
+  });
 
-// ---------------------------------------------------------------------------
-// Test 2: restart after cancel — verifies ImportController resets correctly
-// ---------------------------------------------------------------------------
-test("import pokemon: restart after cancel works", async () => {
-  // From post-cancel state, click "Import Pokémon" again.
-  const importPokemonBtn = page.getByRole("button", { name: "Import Pokémon" });
-  await importPokemonBtn.click();
+  // ---------------------------------------------------------------------------
+  // Test 2: restart after cancel — verifies ImportController resets correctly
+  // ---------------------------------------------------------------------------
+  test("import pokemon: restart after cancel works", async () => {
+    // From post-cancel state, click "Import Pokémon" again.
+    const importPokemonBtn = page.getByRole("button", { name: "Import Pokémon" });
+    await importPokemonBtn.click();
 
-  // Cancel must reappear within 10s (ImportController was correctly reset).
-  const cancelBtn = page.getByRole("button", { name: "Cancel" });
-  await expect(cancelBtn).toBeVisible({ timeout: 10_000 });
+    // Cancel must reappear within 10s (ImportController was correctly reset).
+    const cancelBtn = page.getByRole("button", { name: "Cancel" });
+    await expect(cancelBtn).toBeVisible({ timeout: 10_000 });
 
-  // Cancel again to leave the environment clean.
-  await cancelBtn.click();
-  await expect(cancelBtn).not.toBeVisible({ timeout: 15_000 });
-  await expect(importPokemonBtn).toBeEnabled({ timeout: 15_000 });
+    // Cancel again to leave the environment clean.
+    await cancelBtn.click();
+    await expect(cancelBtn).not.toBeVisible({ timeout: 15_000 });
+    await expect(importPokemonBtn).toBeEnabled({ timeout: 15_000 });
+  });
 });
 
 // ---------------------------------------------------------------------------
