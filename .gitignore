@@ -61,6 +61,10 @@ ehthumbs.db
 Desktop.ini
 $RECYCLE.BIN/
 
+# ---------- Local tooling ----------
+actionlint-bin/
+actionlint.zip
+
 # ---------- Misc ----------
 *.tsbuildinfo
 .cache/
