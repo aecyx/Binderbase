@@ -121,5 +121,4 @@ test("keyring-degraded notice surface exists", async () => {
     await expect(notice).toContainText("OS keyring unavailable");
   }
   // If the notice is absent, the keyring is healthy — that's fine too.
-  expect(noticeCount === 0 || noticeCount > 0).toBe(true);
 });
