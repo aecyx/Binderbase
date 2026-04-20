@@ -19,8 +19,9 @@
  *   1. Launch with remote debugging:
  *        $env:WEBVIEW2_ADDITIONAL_BROWSER_ARGUMENTS = "--remote-debugging-port=9223"
  *        npm run tauri dev
- *   2. Run:
- *        npx playwright test e2e/catalog-import.spec.ts
+ *   2. Run with a single Playwright worker because these CDP-backed tests
+ *      require exclusive control of the single running Tauri webview:
+ *        npx playwright test --workers=1 e2e/catalog-import.spec.ts
  */
 import { test, expect, chromium, type Page } from "@playwright/test";
 
