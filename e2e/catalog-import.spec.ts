@@ -33,7 +33,12 @@ let page: Page;
 test.beforeAll(async () => {
   const browser = await chromium.connectOverCDP("http://127.0.0.1:9223");
   page = browser.contexts()[0].pages()[0];
-  await page.getByRole("button", { name: "Import / Export" }).click();
+
+  const importExportBtn = page.getByRole("button", { name: "Import / Export" });
+  await expect(importExportBtn).toBeVisible();
+  await expect(importExportBtn).toBeEnabled();
+  await importExportBtn.click();
+
   await expect(page.getByRole("heading", { name: "Catalog Import" })).toBeVisible();
 });
 
