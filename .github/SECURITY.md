@@ -75,8 +75,8 @@ admin applies the ruleset via the GitHub UI.
 
 ### Solo-maintainer tradeoffs
 
-Binderbase is currently single-maintainer, which forces three
-Branch-Protection concessions:
+Binderbase is currently single-maintainer, which forces three branch-
+protection concessions:
 
 1. **Required approving review count is `1`, not `2`.**
    Setting the count to `2` would make merges impossible without a
